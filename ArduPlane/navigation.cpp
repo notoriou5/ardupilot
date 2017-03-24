@@ -206,6 +206,114 @@ void Plane::update_loiter(uint16_t radius)
     }
 }
 
+void Plane::update_loiter_ellipse()
+{
+
+    nav_controller->update_loiter_ellipse(home, ellipse.maxradius_cm, ellipse.minmaxratio, ellipse.azimuth_deg, ellipse.orientation);
+}
+
+void Plane::update_loiter_3d()
+{
+    // Christoph Sieg:
+    // nav_controller->update_loiter_3d(S1_in_S2.S1_loc, S1_in_S2.S2_loc, S1_in_S2.S2_radius_cm, S1_in_S2.distance_cm, S1_in_S2.orientation, S1_in_S2.height_cm);
+    // Thomas Gehrmann:
+    nav_controller->update_loiter_3d(home, intersection.circle_center, intersection.circle_radius, intersection.psi_plane, intersection.theta_plane, eight_sphere.omega, eight_sphere.sigma, intersection.distance_cm, loiter.direction, intersection.rot_matrix_pe, eight_sphere.segment, intersection.desired_loc);
+
+}
+
+void Plane::update_eight_sphere()
+{
+//  float arspd = ahrs.get_airspeed()->get_airspeed();
+    float delta_r = 0;
+    /*if(arspd > 30) {
+        delta_r = 0.5*(arspd - 30);
+    }*/
+
+    if(g.omega_wind != eight_sphere.omega_old) {
+        do_eight_sphere();
+    }
+
+    switch(eight_sphere.segment)
+    {
+    case 0: { //left turning circle
+        //hal.console->println("case 0");
+
+        nav_controller->update_loiter_3d(home, eight_sphere.circle_center_left, intersection.circle_radius, M_PI/2, eight_sphere.eta, eight_sphere.omega, eight_sphere.sigma, intersection.distance_cm, 1, eight_sphere.rot_matrix_left, eight_sphere.segment, intersection.desired_loc);
+
+        int32_t nav_bearing = nav_controller->nav_bearing_cd();
+
+        //hal.console->println("nav_bearing");
+        //hal.console->println(nav_bearing);
+        /*hal.console->println("radius");
+        hal.console->println(intersection.circle_radius);
+        hal.console->println("slope");
+        hal.console->println(eight_sphere.slope);
+        hal.console->println("distance");
+        hal.console->println(intersection.distance_cm);
+        hal.console->println("lat");
+        hal.console->println(eight_sphere.circle_center_left.lat);
+        hal.console->println("lng");
+        hal.console->println(eight_sphere.circle_center_left.lng);*/
+
+        // use 26850 instead of 27000 to overcome delay
+        if(nav_bearing >= 27000 + RadiansToCentiDegrees(eight_sphere.sector_angle)) {
+            eight_sphere.segment++;
+            eight_sphere.segment = eight_sphere.segment % 4;
+        }
+        break;
+    }
+
+    case 1: {
+        //hal.console->println("case 1");
+        nav_controller->update_loiter_3d(home, home, intersection.sphere_radius_cm/100.0f+delta_r, eight_sphere.cross_angle, M_PI/2, eight_sphere.omega, eight_sphere.sigma, 0, 1, eight_sphere.rot_matrix_cross1, eight_sphere.segment, intersection.desired_loc);
+
+        int32_t nav_bearing = wrap_180_cd(nav_controller->nav_bearing_cd());
+        //hal.console->println("nav_bearing");
+        //hal.console->println(nav_bearing);
+
+        if(nav_bearing >= RadiansToCentiDegrees(eight_sphere.arc_length_angle)) {
+            eight_sphere.segment++;
+            eight_sphere.segment = eight_sphere.segment % 4;
+        }
+        break;
+    }
+
+    case 2: { // right turning circle
+        //hal.console->println("case 2");
+
+        nav_controller->update_loiter_3d(home, eight_sphere.circle_center_right, intersection.circle_radius, -M_PI/2, eight_sphere.eta, eight_sphere.omega, eight_sphere.sigma, intersection.distance_cm, -1, eight_sphere.rot_matrix_right, eight_sphere.segment, intersection.desired_loc);
+
+        int32_t nav_bearing = nav_controller->nav_bearing_cd();
+        //hal.console->println("nav_bearing");
+        //hal.console->println(nav_bearing);
+
+        // use 9150 instead of 9000 to overcome delay
+        if(nav_bearing <= 9000 - RadiansToCentiDegrees(eight_sphere.sector_angle) && nav_bearing > 0) {
+            eight_sphere.segment++;
+            eight_sphere.segment = eight_sphere.segment % 4;
+        }
+        break;
+    }
+
+    case 3: {
+        //hal.console->println("case 3");
+        nav_controller->update_loiter_3d(home, home, intersection.sphere_radius_cm/100.0f+delta_r, -eight_sphere.cross_angle, M_PI/2, eight_sphere.omega, eight_sphere.sigma, 0, -1, eight_sphere.rot_matrix_cross2, eight_sphere.segment, intersection.desired_loc);
+
+        int32_t nav_bearing = wrap_180_cd(nav_controller->nav_bearing_cd());
+        //hal.console->println("nav_bearing");
+        //hal.console->println(nav_bearing);
+
+        if(nav_bearing <= -RadiansToCentiDegrees(eight_sphere.arc_length_angle)) {
+            eight_sphere.segment++;
+            eight_sphere.segment = eight_sphere.segment % 4;
+        }
+        break;
+    }
+
+    }
+
+}
+
 /*
   handle CRUISE mode, locking heading to GPS course when we have
   sufficient ground speed, and no aileron or rudder input

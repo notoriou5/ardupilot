@@ -48,6 +48,9 @@ void Plane::failsafe_short_on_event(enum failsafe_state fstype, mode_reason_t re
         }
         break;
 
+    case LOITER_ELLIPSE:     // not finished
+    case LOITER_3D:     // not finished
+    case EIGHT_SPHERE: // not finished
     case CIRCLE:
     case RTL:
     case QLAND:
@@ -108,6 +111,9 @@ void Plane::failsafe_long_on_event(enum failsafe_state fstype, mode_reason_t rea
         }
         break;
 
+    case LOITER_ELLIPSE: // not finished
+    case LOITER_3D: // not finished
+    case EIGHT_SPHERE: // not finished
     case RTL:
     case QLAND:
     case QRTL:

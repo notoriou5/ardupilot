@@ -616,6 +616,9 @@ void Plane::update_flight_mode(void)
 
     case RTL:
     case LOITER:
+    case LOITER_ELLIPSE:
+    case LOITER_3D:
+    case EIGHT_SPHERE:
         calc_nav_roll();
         calc_nav_pitch();
         calc_throttle();
@@ -841,6 +844,18 @@ void Plane::update_navigation()
 
     case CRUISE:
         update_cruise();
+        break;
+
+    case LOITER_ELLIPSE:
+        update_loiter_ellipse();
+        break;
+
+    case LOITER_3D:
+        update_loiter_3d();
+        break;
+
+    case EIGHT_SPHERE:
+        update_eight_sphere();
         break;
 
     case MANUAL:

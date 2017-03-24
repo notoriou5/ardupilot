@@ -75,6 +75,9 @@ public:
 	// navigation attitude/steering.
 	virtual void update_loiter(const struct Location &center_WP, float radius, int8_t loiter_direction) = 0;
 
+	virtual void update_loiter_ellipse(const struct Location &center, const int32_t maxradius_cm, const float minmaxratio, const float psi, const int8_t orientation) = 0;
+	virtual void update_loiter_3d(const struct Location &S2center, const struct Location &S1center, int32_t S1radius, int32_t D, int8_t orientation, int32_t &height) = 0;
+	virtual void update_loiter_3d(const struct Location &anchor, const struct Location &center_WP, float radius, float psi, float theta, float w, float sigma, int32_t dist, int8_t loiter_direction, Matrix3f M_pe, int32_t segment, struct Location &desired_loc) = 0;
 	// update the internal state of the navigation controller, given a
 	// fixed heading. This is the step function for navigation control
 	// for a fixed heading.  This function is called at regular

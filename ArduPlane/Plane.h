@@ -660,6 +660,84 @@ private:
         uint32_t time_max_ms;
     } loiter;
 
+    struct Ellipse {
+            struct Location center_loc;
+            int32_t maxradius_cm;
+            float minmaxratio;
+            float azimuth_deg;
+            int8_t orientation;
+            int32_t height_cm;
+
+        } ellipse;
+
+    struct circ_on_sphere {
+        struct Location S2_loc;
+        struct Location S1_loc;
+        int32_t S2_radius_cm;
+        int32_t S1_radius_cm;
+        int32_t distance_cm; // distance of center of the circle from the center of the sphere
+        float theta_rho_deg; // half of the pening angle of the cone with base S1
+        float azimuth_deg;
+        float inclination_deg;
+        int8_t orientation;
+        int32_t height_cm;
+
+    } S1_in_S2;
+
+
+    struct {
+        // rotation around e_z and e_y
+        float psi_plane;
+        float theta_plane;
+
+        int32_t distance_cm;         // distance between plane and origin in cm
+
+        Vector3f normal_vec;    // normal vector, perpendicular to plane spanned by rotated e_y and e_x
+        struct Location circle_center;
+
+        int32_t sphere_radius_cm;    // radius of sphere in cm
+        float circle_radius;    // radius of cross section between sphere and plane in m
+
+        Matrix3f rot_matrix_pe;    // describes an earth frame vector in the new plane frame
+
+//        int32_t height;           // z position on circle
+        Location desired_loc;        // location of desired point on circle
+
+        float eccent;              // eccentricity of circle projection (ellipse)
+
+    } intersection;
+
+    struct {
+
+        float omega;              // rotation of eight around e_z in ef, omega equals winddirection
+        float omega_old;            // check if omega has changed during flight
+        float sigma;                // rotation of eight around e_y'
+
+        float cross_angle;       // half angle of crossing path
+        float arc_length_angle;
+
+        float eta;            // angle of intersection circle
+
+        float secant;           // distance between two ending points
+
+        float sector_angle;     // 2*sector_angle + pi = sector of circle
+
+        Vector3f normal_vec;    // Unitvector to circle center
+        //Matrix3f rot_8_matrix;  // rotates (active) the whole eight around omega and eta
+
+        Matrix3f rot_matrix_right; // describes an earth frame vector in the plane frame of right turning circles
+        Matrix3f rot_matrix_left;
+        Matrix3f rot_matrix_cross1;
+        Matrix3f rot_matrix_cross2;
+
+        struct Location circle_center_left;
+        struct Location circle_center_right;
+
+        int32_t segment = 0;         // defines on which segment of the eight the plane is
+
+    } eight_sphere;
+
+
 
     // Conditional command
     // A value used in condition commands (eg delay, change alt, etc.)
@@ -884,6 +962,9 @@ private:
     bool verify_vtol_takeoff(const AP_Mission::Mission_Command &cmd);
     bool verify_vtol_land(const AP_Mission::Mission_Command &cmd);
     void do_loiter_at_location();
+    void do_loiter_ellipse();
+    void do_loiter_3d();
+    void do_eight_sphere();
     void do_take_picture();
     bool verify_loiter_heading(bool init);
     void log_picture();
@@ -925,6 +1006,9 @@ private:
     void calc_airspeed_errors();
     void calc_gndspeed_undershoot();
     void update_loiter(uint16_t radius);
+    void update_loiter_ellipse();
+    void update_loiter_3d();
+    void update_eight_sphere();
     void update_cruise();
     void update_fbwb_speed_height(void);
     void setup_turn_angle(void);

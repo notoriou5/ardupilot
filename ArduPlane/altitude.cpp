@@ -54,6 +54,13 @@ void Plane::adjust_altitude_target()
     } else {
         set_target_altitude_location(next_WP_loc);
     }
+//    if (control_mode == LOITER_3D || control_mode == EIGHT_SPHERE) {
+//       set_target_altitude(S1_in_S2.height_cm);
+//    }
+      if (control_mode == LOITER_3D || control_mode == EIGHT_SPHERE) {
+//        set_target_altitude(intersection.height);
+          set_target_altitude_location(intersection.desired_loc);
+    }
 
     altitude_error_cm = calc_altitude_error_cm();
 }

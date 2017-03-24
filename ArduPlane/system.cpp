@@ -476,6 +476,25 @@ void Plane::set_mode(enum FlightMode mode, mode_reason_t reason)
 		
         break;
 
+    case LOITER_ELLIPSE:
+        auto_throttle_mode = true;
+        do_loiter_3d();
+        break;
+
+
+    case LOITER_3D:
+        auto_throttle_mode = true;
+        do_loiter_3d();
+
+        // mission.start_or_resume();
+        break;
+
+    case EIGHT_SPHERE:
+        auto_throttle_mode = true;
+        do_eight_sphere();
+        break;
+
+
     case AVOID_ADSB:
     case GUIDED:
         auto_throttle_mode = true;
