@@ -870,11 +870,12 @@ void Plane::do_loiter_at_location()
     next_WP_loc = current_loc;
 }
 
+
 void Plane::do_loiter_ellipse()
 {
     ellipse.maxradius_cm = 120000;
     ellipse.minmaxratio = cosf(radians(30));
-    ellipse.azimuth_deg = 45;
+    ellipse.azimuth_deg = 45; // azimuth of the larger principal axis from the north direction
     ellipse.orientation = 1;
     ellipse.height_cm = 60000;
 }

@@ -667,8 +667,7 @@ private:
             float azimuth_deg;
             int8_t orientation;
             int32_t height_cm;
-
-        } ellipse;
+    } ellipse;
 
     struct circ_on_sphere {
         struct Location S2_loc;
@@ -680,8 +679,8 @@ private:
         float azimuth_deg;
         float inclination_deg;
         int8_t orientation;
-        int32_t height_cm;
-
+//        int32_t height_cm;
+        struct Location desired_loc;
     } S1_in_S2;
 
 

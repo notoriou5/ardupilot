@@ -398,8 +398,165 @@ void AP_L1_Control::update_loiter(const struct Location &center_WP, float radius
     _data_is_stale = false; // status are correctly updated with current waypoint data
 }
 
-void AP_L1_Control::update_loiter_ellipse(const struct Location &center, const int32_t maxradius_cm, const float minmaxratio, const float psi, const int8_t orientation)
+void AP_L1_Control::update_loiter_ellipse(const struct Location &center_loc, const int32_t maxradius_cm, const float minmaxratio, const float psi, const int8_t orientation)
 {
+    struct Location _current_loc;
+
+    // scale loiter radius with square of EAS2TAS to allow us to stay
+    // stable at high altitude
+    // maxradius_cm *= sq(_ahrs.get_EAS2TAS());
+
+    // Calculate guidance gains used by PD loop (used during circle tracking)
+    const float omega = (6.2832f / _L1_period);
+    const float Kx = omega * omega;
+    const float Kv = 2.0f * _L1_damping * omega;
+
+    // Calculate L1 gain required for specified damping (used during waypoint capture)
+    const float K_L1 = 4.0f * _L1_damping * _L1_damping;
+
+    // get current position and velocity in NED frame
+    if (_ahrs.get_position(_current_loc) == false) {
+        // if no GPS loc available, maintain last nav/target_bearing
+        _data_is_stale = true;
+        return;
+    }
+        // position of aircraft relative to the center of the ellipse
+    const Vector3f posav(location_diff_3d(center_loc, _current_loc));
+
+    // lateral projection
+    const Vector2f posalv(posav.x, posav.y);
+    // update _target_bearing_cd
+    _target_bearing_cd = get_bearing_cd(_current_loc, center_loc);
+
+    // velocity of aircraft in NED coordinate system
+    const Vector3f velav;
+    // only use if ahrs.have_inertial_nav() is true
+    if (_ahrs.get_velocity_NED(velav)) {
+    }
+    else {Vector2f(velav.x, velav.y)=_ahrs.groundspeed_vector();
+          /* if (gps.status() >= AP_GPS::GPS_OK_FIX_3D && gps.have_vertical_velocity()) {
+                  velav = gps.velocity().z;
+              } else {
+                  velav = -barometer.get_climb_rate();
+              }; */
+          velav.z = 0;
+    }
+    const Vector2f velalv(velav.x,velav.y);
+    const float velal = MAX(velalv.length(), 1.0f);
+
+    // unit vector pointing from the center to the  aircraft
+    Vector2f erlv;
+    erlv = posalv;
+    if (erlv.length() > 0.1f) {
+        erlv = posalv.normalized();
+    } else {
+        if (velalv.length() < 0.1f) {
+            erlv = Vector2f(cosf(_ahrs.yaw), sinf(_ahrs.yaw));
+        } else {
+            erlv = velalv.normalized();
+        }
+    }
+
+    // Calculate time varying control parameters
+    // Calculate the L1 length required for specified period
+    // 0.3183099 = 1/pi
+    _L1_dist = 0.3183099f * _L1_damping * _L1_period * velal;
+
+
+
+    //Calculate Nu to capture center_WP
+    const float xtrackVelCap = erlv % velalv; // Velocity across line - perpendicular to radial inbound to WP
+    const float ltrackVelCap = - (velalv * erlv); // Velocity along line - radial inbound to WP
+    const float Nu = atan2f(xtrackVelCap,ltrackVelCap);
+
+    _prevent_indecision(Nu);
+    _last_Nu = Nu;
+
+    Nu = constrain_float(Nu, -M_PI_2, M_PI_2); //Limit Nu to +- Pi/2
+
+    //Calculate lat accln demand to capture center_WP (use L1 guidance law)
+    const float latAccDemCap = K_L1 * velalv * velalv / _L1_dist * sinf(Nu);
+
+    const float cos_psi = cosf(psi);
+    const float sin_psi = sinf(psi);
+    const float cos_theta = minmaxratio;
+    const float sin_theta = sqrt(1.0f - minmaxratio);
+    // unit vectors into the direction of larger and smaller principal axes
+    const Vector2f e1(cos_psi,sin_psi);
+    const Vector2f e2(-e1.y,e1.x);
+    // projections of the aircraft's position onto e1 and e2
+    const float posal1 = posalv * e1;
+    const float posal2 = posalv * e2;
+    // radius at the (uncorrected) desired position on the circle
+    const float ra = sqrt(sq(posal1) + sq(1/cos_theta * posal2));
+    const float rho = ra - maxradius_cm/100.0f;
+    // trigononometric functions of curve parameter phia at the aircraft's position
+    const float cos_phia = posal1/ra;
+    const float sin_phia = posal2/(ra * cos_theta);
+    // first oder correction to curve parameter to approximate parameter at point of the ellipse closest to the aircraft's position
+    const float dphi = rho * sq(sin_theta) * sin_phia * cos_phia /( maxradius_cm/100.0f * sq(cos_phia * sin_theta) - ra );
+    const float cos_dphi = cosf(dphi);
+    const float sin_dphi = sinf(dphi);
+    const float cos_phiapdphi = cos_phia * cos_dphi - sin_phia * sin_dphi;
+    const float sin_phiapdphi = cos_phia * sin_dphi + sin_phia * cos_dphi;
+    // distance of the aircraft from the ellipse;
+    const float dae = (maxradius_cm/100.0f - ra * cos_dphi) * cos_theta /(1 - sq(cos_phiapdphi * sin_theta));
+    // position vector of point of the ellipse closest to the aircraft's position relative to center_loc
+    const Vector2f poselv = Vector2f((e1 * cos_phiapdphi + e2 * cos_theta * sin_phiapdphi) * maxradius_cm/100.0f);
+    // projections onto e1 and e2
+    const float posel1 = poselv * e1;
+    const float posel2 = poselv * e2;
+    const float norm = sqrt(sq(cos_theta * posel1) + sq(1/cos_theta * posel2));
+    // unit tangent vector at point of the ellipse closest to the aircraft's position relative to center_loc
+    const Vector2f etelv = Vector2f(-e1 * 1/cos_theta * posel2 + e2 * cos_theta * posel1) * 1/norm * orientation;
+    // unit outer normal vector at point of the ellipse closest to the aircraft's position relative to center_loc
+    const Vector2f enelv(etelv.y * orientation, etelv.x * orientation);
+    // curvature at point of the ellipse closest to the aircraft's position relative to center_loc
+    const float kappa = cos_theta /(ra * powf(norm,3));
+
+
+    //Calculate radial position and velocity errors
+    const float xtrackVelCirc = -ltrackVelCap; // Radial outbound velocity - reuse previous radial inbound velocity
+    const float xtrackErrCirc = posalv.length() - radius; // Radial distance from the loiter circle
+
+    // keep crosstrack error for reporting
+    _crosstrack_error = xtrackErrCirc;
+
+    //Calculate PD control correction to circle waypoint_ahrs.roll
+    float latAccDemCircPD = (xtrackErrCirc * Kx + xtrackVelCirc * Kv);
+
+    //Calculate tangential velocity
+    float velTangent = xtrackVelCap * float(orientation);
+
+    //Prevent PD demand from turning the wrong way by limiting the command when flying the wrong way
+    if (ltrackVelCap < 0.0f && velTangent < 0.0f) {
+        latAccDemCircPD =  MAX(latAccDemCircPD, 0.0f);
+    }
+
+    // Calculate centripetal acceleration demand
+    float latAccDemCircCtr = velTangent * velTangent / MAX((0.5f * radius), (radius + xtrackErrCirc));
+
+    //Sum PD control and centripetal acceleration to calculate lateral manoeuvre demand
+    float latAccDemCirc = loiter_direction * (latAccDemCircPD + latAccDemCircCtr);
+
+    // Perform switchover between 'capture' and 'circle' modes at the
+    // point where the commands cross over to achieve a seamless transfer
+    // Only fly 'capture' mode if outside the circle
+    if (xtrackErrCirc > 0.0f && loiter_direction * latAccDemCap < loiter_direction * latAccDemCirc) {
+        _latAccDem = latAccDemCap;
+        _WPcircle = false;
+        _bearing_error = Nu; // angle between demanded and achieved velocity vector, +ve to left of track
+        _nav_bearing = atan2f(-A_air_unit.y , -A_air_unit.x); // bearing (radians) from AC to L1 point
+    } else {
+        _latAccDem = latAccDemCirc;
+        _WPcircle = true;
+        _bearing_error = 0.0f; // bearing error (radians), +ve to left of track
+        _nav_bearing = atan2f(-A_air_unit.y , -A_air_unit.x); // bearing (radians)from AC to L1 point
+    }
+
+    _data_is_stale = false; // status are correctly updated with current waypoint data
+
+
     // current location of the aircraft
 }
 
@@ -835,7 +992,7 @@ void AP_L1_Control::update_loiter_3d(const struct Location &anchor, const struct
     } else {
         spring_const = 0;
     }
-    float airspeed = _ahrs.get_airspeed()->get_airspeed();
+    // float airspeed = _ahrs.get_airspeed()->get_airspeed();
     tether_length_demand = 400;// + 0.2*(airspeed - 30);
 
 

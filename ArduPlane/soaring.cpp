@@ -28,6 +28,15 @@ void Plane::update_soaring() {
     case LOITER:
         // Do nothing. We will switch back to auto/rtl before enabling throttle.
         break;
+    case LOITER_ELLIPSE:
+        // Do nothing. We will switch back to auto/rtl before enabling throttle.
+        break;
+    case LOITER_3D:
+        // Do nothing. We will switch back to auto/rtl before enabling throttle.
+        break;
+    case EIGHT_SPHERE:
+        // Do nothing. We will switch back to auto/rtl before enabling throttle.
+        break;
     default:
         // This does not affect the throttle since suppressed is only checked in the above three modes. 
         // It ensures that the soaring always starts with throttle suppressed though.

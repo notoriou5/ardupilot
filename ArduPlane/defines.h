@@ -68,7 +68,6 @@ enum FlightMode {
     LOITER_ELLIPSE = 36,
     LOITER_3D = 37,
     EIGHT_SPHERE = 38
-
 };
 
 enum mode_reason_t {
