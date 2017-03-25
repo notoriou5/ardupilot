@@ -421,7 +421,7 @@ void AP_L1_Control::update_loiter_ellipse(const struct Location &center_loc, con
         return;
     }
         // position of aircraft relative to the center of the ellipse
-    const Vector3f posav(location_diff_3d(center_loc, _current_loc));
+    const Vector3f posav(location_3d_diff_NED(center_loc, _current_loc));
 
     // lateral projection
     const Vector2f posalv(posav.x, posav.y);
@@ -429,7 +429,7 @@ void AP_L1_Control::update_loiter_ellipse(const struct Location &center_loc, con
     _target_bearing_cd = get_bearing_cd(_current_loc, center_loc);
 
     // velocity of aircraft in NED coordinate system
-    const Vector3f velav;
+    Vector3f velav;
     // only use if ahrs.have_inertial_nav() is true
     if (_ahrs.get_velocity_NED(velav)) {
     }
@@ -456,6 +456,7 @@ void AP_L1_Control::update_loiter_ellipse(const struct Location &center_loc, con
             erlv = velalv.normalized();
         }
     }
+    const float vela = velalv.length();
 
     // Calculate time varying control parameters
     // Calculate the L1 length required for specified period
@@ -467,7 +468,7 @@ void AP_L1_Control::update_loiter_ellipse(const struct Location &center_loc, con
     //Calculate Nu to capture center_WP
     const float xtrackVelCap = erlv % velalv; // Velocity across line - perpendicular to radial inbound to WP
     const float ltrackVelCap = - (velalv * erlv); // Velocity along line - radial inbound to WP
-    const float Nu = atan2f(xtrackVelCap,ltrackVelCap);
+    float Nu = atan2f(xtrackVelCap,ltrackVelCap);
 
     _prevent_indecision(Nu);
     _last_Nu = Nu;
@@ -475,7 +476,7 @@ void AP_L1_Control::update_loiter_ellipse(const struct Location &center_loc, con
     Nu = constrain_float(Nu, -M_PI_2, M_PI_2); //Limit Nu to +- Pi/2
 
     //Calculate lat accln demand to capture center_WP (use L1 guidance law)
-    const float latAccDemCap = K_L1 * velalv * velalv / _L1_dist * sinf(Nu);
+    const float latAccDemCap = K_L1 * vela * vela / _L1_dist * sinf(Nu);
 
     const float cos_psi = cosf(psi);
     const float sin_psi = sinf(psi);
@@ -516,8 +517,9 @@ void AP_L1_Control::update_loiter_ellipse(const struct Location &center_loc, con
 
 
     //Calculate radial position and velocity errors
-    const float xtrackVelCirc = -ltrackVelCap; // Radial outbound velocity - reuse previous radial inbound velocity
-    const float xtrackErrCirc = posalv.length() - radius; // Radial distance from the loiter circle
+    const float xtrackVelCirc = enelv * velalv; // normal outbound velocity
+    const float xtrackErrCirc = dae; // Radial distance from the loiter circle
+    const float ltrackVelCirc = etelv * velalv; // tangential velocity in the tangential direction (depends on orientation)
 
     // keep crosstrack error for reporting
     _crosstrack_error = xtrackErrCirc;
@@ -526,7 +528,7 @@ void AP_L1_Control::update_loiter_ellipse(const struct Location &center_loc, con
     float latAccDemCircPD = (xtrackErrCirc * Kx + xtrackVelCirc * Kv);
 
     //Calculate tangential velocity
-    float velTangent = xtrackVelCap * float(orientation);
+    float velTangent = ltrackVelCirc; // * float(orientation);
 
     //Prevent PD demand from turning the wrong way by limiting the command when flying the wrong way
     if (ltrackVelCap < 0.0f && velTangent < 0.0f) {
@@ -534,24 +536,24 @@ void AP_L1_Control::update_loiter_ellipse(const struct Location &center_loc, con
     }
 
     // Calculate centripetal acceleration demand
-    float latAccDemCircCtr = velTangent * velTangent / MAX((0.5f * radius), (radius + xtrackErrCirc));
+    float latAccDemCircCtr = velTangent * velTangent * kappa;
 
     //Sum PD control and centripetal acceleration to calculate lateral manoeuvre demand
-    float latAccDemCirc = loiter_direction * (latAccDemCircPD + latAccDemCircCtr);
+    float latAccDemCirc = orientation * (latAccDemCircPD + latAccDemCircCtr);
 
     // Perform switchover between 'capture' and 'circle' modes at the
     // point where the commands cross over to achieve a seamless transfer
     // Only fly 'capture' mode if outside the circle
-    if (xtrackErrCirc > 0.0f && loiter_direction * latAccDemCap < loiter_direction * latAccDemCirc) {
+    if (xtrackErrCirc > 0.0f && orientation * latAccDemCap < orientation * latAccDemCirc) {
         _latAccDem = latAccDemCap;
         _WPcircle = false;
         _bearing_error = Nu; // angle between demanded and achieved velocity vector, +ve to left of track
-        _nav_bearing = atan2f(-A_air_unit.y , -A_air_unit.x); // bearing (radians) from AC to L1 point
+        _nav_bearing = atan2f(-posalv.y , -posalv.x); // bearing (radians) from AC to L1 point
     } else {
         _latAccDem = latAccDemCirc;
         _WPcircle = true;
         _bearing_error = 0.0f; // bearing error (radians), +ve to left of track
-        _nav_bearing = atan2f(-A_air_unit.y , -A_air_unit.x); // bearing (radians)from AC to L1 point
+        _nav_bearing = atan2f(-posalv.y , -posalv.x); // bearing (radians)from AC to L1 point
     }
 
     _data_is_stale = false; // status are correctly updated with current waypoint data
