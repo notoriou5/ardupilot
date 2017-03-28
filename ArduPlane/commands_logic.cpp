@@ -885,78 +885,79 @@ void Plane::do_loiter_ellipse()
 }
 
 
-
-//void Plane::do_loiter_3d()
-//{
-//    S1_in_S2.S2_loc = home;
-//    S1_in_S2.S2_radius_cm = 120000;
-//    S1_in_S2.theta_rho_deg = 20;
-//    S1_in_S2.azimuth_deg = 30;
-//    S1_in_S2.inclination_deg = 60;
-//
-//    float theta = 90 - S1_in_S2.inclination_deg;
-//
-//    float cos_psi = cosf(radians(S1_in_S2.azimuth_deg));
-//    float sin_psi = sinf(radians(S1_in_S2.azimuth_deg));
-//    float cos_theta = cosf(radians(theta));
-//    float sin_theta = sinf(radians(theta));
-//
-//    Vector3f erc(sin_theta * cos_psi, sin_theta * sin_psi, - cos_theta);
-//    Vector3f rc = erc * S1_in_S2.distance_cm;
-//
-//    S1_in_S2.S1_loc = location_offset(S1_in_S2.S2_loc, rc.x/100.0f, rc.y/100.0f);
-//    S1_in_S2.S1_loc.alt = S1_in_S2.S2_loc.alt - rc.z;
-//
-//
-//};
-
+// Christoph Sieg:
 void Plane::do_loiter_3d()
 {
-//    float LOCATION_SCALING_FACTOR_INV = 89.83204953368922;
+    S1_in_S2.S2_loc = home;
+    S1_in_S2.S2_radius_cm = 120000;
+    S1_in_S2.theta_rho_deg = 20;
+    S1_in_S2.azimuth_deg = 30;
+    S1_in_S2.inclination_deg = 60;
 
-    intersection.psi_plane = radians(0);
-    intersection.theta_plane = radians(-60);
+    float theta = 90 - S1_in_S2.inclination_deg;
 
-    // do not vary omega and sigma, they have just to be defined because of the do_eight_sphere() function
-    eight_sphere.omega = radians(0);
-    eight_sphere.sigma = radians(0);
+    float cos_psi = cosf(radians(S1_in_S2.azimuth_deg));
+    float sin_psi = sinf(radians(S1_in_S2.azimuth_deg));
+    float cos_theta = cosf(radians(theta));
+    float sin_theta = sinf(radians(theta));
 
-    intersection.distance_cm = 14000;
+    Vector3f erc(sin_theta * cos_psi, sin_theta * sin_psi, - cos_theta);
+    Vector3f rc = erc * S1_in_S2.distance_cm;
 
-    intersection.sphere_radius_cm = 20000;
-
-    float cos_psi = cosf(intersection.psi_plane);
-    float cos_theta = cosf(intersection.theta_plane);
-    float sin_psi = sinf(intersection.psi_plane);
-    float sin_theta = sinf(intersection.theta_plane);
-
-    intersection.normal_vec.x = - sin_theta * cos_psi;
-    intersection.normal_vec.y = - sin_theta * sin_psi;
-    intersection.normal_vec.z = - cos_theta;
-
-    intersection.circle_radius = sqrtf(intersection.sphere_radius_cm/100.0f * intersection.sphere_radius_cm/100.0f - intersection.distance_cm/100.0f * intersection.distance_cm/100.0f);
-
-    intersection.eccent = sin_theta;
-
-    intersection.circle_center = home;
-    intersection.circle_center.lat += intersection.distance_cm/100.0f * intersection.normal_vec.x * LOCATION_SCALING_FACTOR_INV;
-    intersection.circle_center.lng += intersection.distance_cm/100.0f * intersection.normal_vec.y * LOCATION_SCALING_FACTOR_INV / longitude_scale(home);
-    intersection.circle_center.alt -= intersection.distance_cm * intersection.normal_vec.z;
-
-    intersection.rot_matrix_pe.a.x = cos_theta * cos_psi;
-    intersection.rot_matrix_pe.a.y = cos_theta * sin_psi;
-    intersection.rot_matrix_pe.a.z = -sin_theta;
-    intersection.rot_matrix_pe.b.x = -sin_psi;
-    intersection.rot_matrix_pe.b.y = cos_psi;
-    intersection.rot_matrix_pe.b.z = 0;
-    intersection.rot_matrix_pe.c.x = sin_theta * cos_psi;
-    intersection.rot_matrix_pe.c.y = sin_theta * sin_psi;
-    intersection.rot_matrix_pe.c.z = cos_theta;
+    location_offset(S1_in_S2.S2_loc, rc.x/100.0f, rc.y/100.0f);
+    S1_in_S2.S1_loc.alt = S1_in_S2.S2_loc.alt - rc.z;
 
 
-    loiter.direction = -1;
+};
 
-}
+// Thomas Gehrmann:
+//void Plane::do_loiter_3d()
+//{
+////    float LOCATION_SCALING_FACTOR_INV = 89.83204953368922;
+//
+//    intersection.psi_plane = radians(0);
+//    intersection.theta_plane = radians(-60);
+//
+//    // do not vary omega and sigma, they have just to be defined because of the do_eight_sphere() function
+//    eight_sphere.omega = radians(0);
+//    eight_sphere.sigma = radians(0);
+//
+//    intersection.distance_cm = 14000;
+//
+//    intersection.sphere_radius_cm = 20000;
+//
+//    float cos_psi = cosf(intersection.psi_plane);
+//    float cos_theta = cosf(intersection.theta_plane);
+//    float sin_psi = sinf(intersection.psi_plane);
+//    float sin_theta = sinf(intersection.theta_plane);
+//
+//    intersection.normal_vec.x = - sin_theta * cos_psi;
+//    intersection.normal_vec.y = - sin_theta * sin_psi;
+//    intersection.normal_vec.z = - cos_theta;
+//
+//    intersection.circle_radius = sqrtf(intersection.sphere_radius_cm/100.0f * intersection.sphere_radius_cm/100.0f - intersection.distance_cm/100.0f * intersection.distance_cm/100.0f);
+//
+//    intersection.eccent = sin_theta;
+//
+//    intersection.circle_center = home;
+//    intersection.circle_center.lat += intersection.distance_cm/100.0f * intersection.normal_vec.x * LOCATION_SCALING_FACTOR_INV;
+//    intersection.circle_center.lng += intersection.distance_cm/100.0f * intersection.normal_vec.y * LOCATION_SCALING_FACTOR_INV / longitude_scale(home);
+//    intersection.circle_center.alt -= intersection.distance_cm * intersection.normal_vec.z;
+//
+//    intersection.rot_matrix_pe.a.x = cos_theta * cos_psi;
+//    intersection.rot_matrix_pe.a.y = cos_theta * sin_psi;
+//    intersection.rot_matrix_pe.a.z = -sin_theta;
+//    intersection.rot_matrix_pe.b.x = -sin_psi;
+//    intersection.rot_matrix_pe.b.y = cos_psi;
+//    intersection.rot_matrix_pe.b.z = 0;
+//    intersection.rot_matrix_pe.c.x = sin_theta * cos_psi;
+//    intersection.rot_matrix_pe.c.y = sin_theta * sin_psi;
+//    intersection.rot_matrix_pe.c.z = cos_theta;
+//
+//
+//    loiter.direction = -1;
+//
+//}
 
 void Plane::do_eight_sphere()
 {
