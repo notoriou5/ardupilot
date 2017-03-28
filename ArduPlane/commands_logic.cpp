@@ -874,11 +874,11 @@ void Plane::do_loiter_at_location()
 void Plane::do_loiter_ellipse()
 {
     ellipse.center_loc = home;
-    ellipse.maxradius_cm = 120000;
-    ellipse.minmaxratio = cosf(radians(30));
+    ellipse.maxradius_cm = 18000;
+    ellipse.minmaxratio = cosf(radians(60));
     ellipse.azimuth_deg = 45; // azimuth of the larger principal axis from the north direction
-    ellipse.orientation = 1;
-    ellipse.height_cm = 60000;
+    ellipse.orientation = -1;
+    ellipse.height_cm = 6000;
 
     ellipse.center_loc.alt = ellipse.center_loc.alt + ellipse.height_cm;
     next_WP_loc = ellipse.center_loc;
@@ -921,9 +921,9 @@ void Plane::do_loiter_3d()
     eight_sphere.omega = radians(0);
     eight_sphere.sigma = radians(0);
 
-    intersection.distance_cm = 22800;
+    intersection.distance_cm = 14000;
 
-    intersection.sphere_radius_cm = 40000;
+    intersection.sphere_radius_cm = 20000;
 
     float cos_psi = cosf(intersection.psi_plane);
     float cos_theta = cosf(intersection.theta_plane);

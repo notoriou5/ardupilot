@@ -59,6 +59,7 @@ void Plane::adjust_altitude_target()
 //    }
       if (control_mode == LOITER_3D || control_mode == EIGHT_SPHERE) {
 //        set_target_altitude(intersection.height);
+          //hal.console->println(intersection.desired_loc.alt);
           set_target_altitude_location(intersection.desired_loc);
     }
 

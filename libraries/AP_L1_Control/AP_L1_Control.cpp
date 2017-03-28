@@ -420,7 +420,7 @@ void AP_L1_Control::update_loiter_ellipse(const struct Location &center_loc, con
         _data_is_stale = true;
         return;
     }
-        // position of aircraft relative to the center of the ellipse
+        // position of aircraft relative to the center of the ellipse; vector components in meters
     const Vector3f posav(location_3d_diff_NED(center_loc, _current_loc));
 
     // lateral projection
@@ -478,47 +478,72 @@ void AP_L1_Control::update_loiter_ellipse(const struct Location &center_loc, con
     //Calculate lat accln demand to capture center_WP (use L1 guidance law)
     const float latAccDemCap = K_L1 * vela * vela / _L1_dist * sinf(Nu);
 
+    // calculate desired position on ellipse with major and minor principal axes along unit vectors e1 and e2, respectively
+    // for given position vector posalv(phia) = ra(cos(phia)e1 + cos(theta)sin(phia)e2) of the aircraft
+    //
+    //hal.console->println(maxradius_cm);
     const float cos_psi = cosf(psi);
     const float sin_psi = sinf(psi);
+    // trigonometric functions of angle at which a circle has to be inclined in order to yield the ellipse
+    // poselv(phi) = cos(phi)e1 + cos(theta)sin(phi)e2
     const float cos_theta = minmaxratio;
     const float sin_theta = sqrt(1.0f - minmaxratio);
-    // unit vectors into the direction of larger and smaller principal axes
+    // unit vectors e1 and e2 into the direction of the major and minor principal axes, respectively
     const Vector2f e1(cos_psi,sin_psi);
     const Vector2f e2(-e1.y,e1.x);
+    //hal.console->print(e1.x);
+    //hal.console->print(" ");
+    //hal.console->println(e1.y);
     // projections of the aircraft's position onto e1 and e2
     const float posal1 = posalv * e1;
     const float posal2 = posalv * e2;
-    // radius at the (uncorrected) desired position on the circle
+    // determine parametrization (ra,phia) of the aircraft's position from lateral components
+    // posal1 = ra cos(phia)
+    // posal2 = ra cos(theta)sin(phia);
+    // distance of the aircraft from the center of the ellipse in meter
     const float ra = sqrt(sq(posal1) + sq(1/cos_theta * posal2));
+    // hal.console->println(ra);
     const float rho = ra - maxradius_cm/100.0f;
     // trigononometric functions of curve parameter phia at the aircraft's position
     const float cos_phia = posal1/ra;
-    const float sin_phia = posal2/(ra * cos_theta);
+    const float sin_phia = orientation * posal2/(ra * cos_theta);
     // first oder correction to curve parameter to approximate parameter at point of the ellipse closest to the aircraft's position
-    const float dphi = rho * sq(sin_theta) * sin_phia * cos_phia /( maxradius_cm/100.0f * sq(cos_phia * sin_theta) - ra );
+    const float dphi = - rho * sq(sin_theta) * sin_phia * cos_phia /(ra * (1 - sq(sin_theta * cos_phia)));
     const float cos_dphi = cosf(dphi);
     const float sin_dphi = sinf(dphi);
+    // trigonometric functions of phi = phia + dphi, which is the first-order value of the curve parameter of the ellipse at the nearest point of the aircraft
     const float cos_phiapdphi = cos_phia * cos_dphi - sin_phia * sin_dphi;
     const float sin_phiapdphi = cos_phia * sin_dphi + sin_phia * cos_dphi;
+    //hal.console->print(cos_phiapdphi);
+    //hal.console->print(" ");
+    //hal.console->println(sin_phiapdphi);
     // distance of the aircraft from the ellipse;
-    const float dae = (maxradius_cm/100.0f - ra * cos_dphi) * cos_theta /(1 - sq(cos_phiapdphi * sin_theta));
+    const float dae = rho * cos_theta /sqrt(1 - sq(sin_theta * cos_phia));
     // position vector of point of the ellipse closest to the aircraft's position relative to center_loc
-    const Vector2f poselv = Vector2f((e1 * cos_phiapdphi + e2 * cos_theta * sin_phiapdphi) * maxradius_cm/100.0f);
+    const Vector2f poselv = Vector2f((e1 * cos_phiapdphi + e2 * cos_theta * sin_phiapdphi * orientation) * maxradius_cm/100.0f);
     // projections onto e1 and e2
     const float posel1 = poselv * e1;
     const float posel2 = poselv * e2;
-    const float norm = sqrt(sq(cos_theta * posel1) + sq(1/cos_theta * posel2));
+    //hal.console->print(posel1);
+    //hal.console->print(" ");
+    //hal.console->println(posel2);
+    const Vector2f telv = Vector2f(-e1 * sin_phiapdphi + e2 * cos_theta * cos_phiapdphi * orientation);
+    const float telvnorm = telv.length();
     // unit tangent vector at point of the ellipse closest to the aircraft's position relative to center_loc
-    const Vector2f etelv = Vector2f(-e1 * 1/cos_theta * posel2 + e2 * cos_theta * posel1) * 1/norm * orientation;
+    const Vector2f etelv = telv / telvnorm;
     // unit outer normal vector at point of the ellipse closest to the aircraft's position relative to center_loc
-    const Vector2f enelv(etelv.y * orientation, etelv.x * orientation);
+    const Vector2f enelv(etelv.y * orientation, -etelv.x * orientation);
     // curvature at point of the ellipse closest to the aircraft's position relative to center_loc
-    const float kappa = cos_theta /(ra * powf(norm,3));
-
+    const float kappa = cos_theta /(ra * powf(telvnorm,3));
+    //hal.console->print(cos_theta);
+    //hal.console->print(" ");
+    //hal.console->println(norm);
 
     //Calculate radial position and velocity errors
     const float xtrackVelCirc = enelv * velalv; // normal outbound velocity
     const float xtrackErrCirc = dae; // Radial distance from the loiter circle
+    //hal.console->print("should be zero: ");
+    //hal.console->println((posalv-poselv) * enelv - dae);
     const float ltrackVelCirc = etelv * velalv; // tangential velocity in the tangential direction (depends on orientation)
 
     // keep crosstrack error for reporting
@@ -537,23 +562,31 @@ void AP_L1_Control::update_loiter_ellipse(const struct Location &center_loc, con
 
     // Calculate centripetal acceleration demand
     float latAccDemCircCtr = velTangent * velTangent * kappa;
+    //hal.console->print(velTangent);
+    //hal.console->print("kappa: ");
+    //hal.console->println(1/kappa);
 
     //Sum PD control and centripetal acceleration to calculate lateral manoeuvre demand
     float latAccDemCirc = orientation * (latAccDemCircPD + latAccDemCircCtr);
+    hal.console->print(latAccDemCircPD);
+    hal.console->print(" ");
+    hal.console->println(latAccDemCircCtr);
 
     // Perform switchover between 'capture' and 'circle' modes at the
     // point where the commands cross over to achieve a seamless transfer
     // Only fly 'capture' mode if outside the circle
-    if (xtrackErrCirc > 0.0f && orientation * latAccDemCap < orientation * latAccDemCirc) {
+    if (xtrackErrCirc > maxradius_cm * (1-minmaxratio)/100.0f && orientation * latAccDemCap < orientation * latAccDemCirc) {
         _latAccDem = latAccDemCap;
         _WPcircle = false;
         _bearing_error = Nu; // angle between demanded and achieved velocity vector, +ve to left of track
         _nav_bearing = atan2f(-posalv.y , -posalv.x); // bearing (radians) from AC to L1 point
+        hal.console->println("capture");
     } else {
         _latAccDem = latAccDemCirc;
         _WPcircle = true;
         _bearing_error = 0.0f; // bearing error (radians), +ve to left of track
         _nav_bearing = atan2f(-posalv.y , -posalv.x); // bearing (radians)from AC to L1 point
+        hal.console->println("loiter_ellipse");
     }
 
     _data_is_stale = false; // status are correctly updated with current waypoint data
@@ -1076,26 +1109,27 @@ void AP_L1_Control::update_loiter_3d(const struct Location &anchor, const struct
     float latAccDemCirc = (latAccDemCircPD + loiter_direction * latAccDemCircCtr + tetherErr); // +tetherErr instead of -tetherErr because tethertension is showing from anchor to current position
 //    float latAccDemCirc = (latAccDemCircPD + loiter_direction * latAccDemCircCtr);
 
-    /*hal.console->print("latAccDemCirc: ");
-    hal.console->println(loiter_direction*latAccDemCircCtr);
-    hal.console->print("latAccDemPD: ");
-    hal.console->println(latAccDemCircPD);*/
+    hal.console->print("latAccDemCirc: ");
+    hal.console->println(loiter_direction*latAccDemCirc);
+    hal.console->print("latAccDemCap: ");
+    hal.console->println(latAccDemCap);
 
     // hal.console->println(sinf(acosf(-cosf(_nav_bearing)*sinf(M_PI/9))));
     // Perform switchover between 'capture' and 'circle' modes at the
     // point where the commands cross over to achieve a seamless transfer
     // Only fly 'capture' mode if outside the circle
-    if (-loiter_direction*xtrackErrCirc > 0.0f && loiter_direction * latAccDemCap < loiter_direction * latAccDemCirc && false) {
+    if (xtrackErrCirc > 0.0f && loiter_direction * latAccDemCap < loiter_direction * latAccDemCirc && false) {
         desired_loc = center_WP;
-        desired_loc.alt = dist * cos_sigma*cos_theta;
+        // desired_loc.alt = dist * cos_sigma*cos_theta;
         //height = dist * cos_sigma*cos_theta; //center_WP.alt - home.alt ;
-        desired_loc = center_WP;
+        //desired_loc = center_WP;
         //hal.console->println("height cap");
         //hal.console->println(height);
         _latAccDem = latAccDemCap;
         _WPcircle = false;
         _bearing_error = Nu; // angle between demanded and achieved velocity vector, +ve to left of track
         _nav_bearing = 0;
+        hal.console->println("capture");
         //hal.console->println("nav_bearing");
         //hal.console->println(_nav_bearing);
         //hal.console->println("latAccDemCap");
@@ -1105,13 +1139,15 @@ void AP_L1_Control::update_loiter_3d(const struct Location &anchor, const struct
         // determine the location of the desired point on the circle
         desired_loc = center_WP;
         location_offset(desired_loc, v_ellipse_ef.x, v_ellipse_ef.y);
-        desired_loc.alt = dist * cos_sigma*cos_theta - 100.0f * v_ellipse_ef.z;
-        hal.console->print("height demanded: ");
+        //desired_loc.alt = dist * cos_sigma*cos_theta - 100.0f * v_ellipse_ef.z;
+        desired_loc.alt = center_WP.alt - 100.0f * v_ellipse_ef.z;
+        //hal.console->print("height demanded: ");
         //hal.console->println(height);
         _latAccDem = latAccDemCirc; //-9.81/_position_vec_ef.z*sqrtf(_position_vec_ef.length_squared()-_position_vec_ef.z*_position_vec_ef.z);
         _WPcircle = true;
         _bearing_error = 0.0f; // bearing error (radians), +ve to left of track
         _nav_bearing = wrap_2PI(atan2f(A_air_unit.y , A_air_unit.x)); // bearing (radians)from AC to Minimum point of circle
+        hal.console->println("loiter_3d");
         //hal.console->print("pitch: ");
         //hal.console->println(_ahrs.pitch_sensor/100.0f);
         //hal.console->println(nav_bearing_cd());
