@@ -409,3 +409,13 @@
 # define HAVE_PX4_MIXER 0
 #endif
 
+//////////////////////////////////////////////////////////////////////////////
+// Winddrone
+#ifndef SIGMA_WIND_DEFAULT
+ # define SIGMA_WIND_DEFAULT      0
+#endif
+
+#ifndef OMEGA_WIND_DEFAULT
+ # define OMEGA_WIND_DEFAULT      0
+#endif
+

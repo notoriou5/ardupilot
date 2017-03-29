@@ -1176,6 +1176,20 @@ const AP_Param::Info Plane::var_info[] = {
     // @Path: ../libraries/AP_Landing/AP_Landing.cpp
     GOBJECT(landing, "LAND_", AP_Landing),
 
+    // @Param: OMEGA_WIND
+    // @DisplayName: Omega
+    // @Description: Orientation of figure-8 pattern, set Omega to wind direction, Omega = 0 means wind is coming from North
+    // @Range: -180 180
+    // @User: Advanced
+    GSCALAR(omega_wind, "OMEGA_WIND", OMEGA_WIND_DEFAULT),
+
+    // @Param: SIGMA_WIND
+    // @DisplayName: Sigma
+    // @Description: Polarangle of figure-8 pattern, Sigma = 0 means figure-8 is on top of hemisphere
+    // @Range: -90 90
+    // @User: Advanced
+    GSCALAR(sigma_wind, "SIGMA_WIND", SIGMA_WIND_DEFAULT),
+
     AP_VAREND
 };
 
