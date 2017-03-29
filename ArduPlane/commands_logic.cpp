@@ -889,10 +889,12 @@ void Plane::do_loiter_ellipse()
 void Plane::do_loiter_3d()
 {
     S1_in_S2.S2_loc = home;
-    S1_in_S2.S2_radius_cm = 120000;
+    S1_in_S2.S2_radius_cm = 40000;
     S1_in_S2.theta_rho_deg = 20;
-    S1_in_S2.azimuth_deg = 30;
-    S1_in_S2.inclination_deg = 60;
+    S1_in_S2.S1_radius_cm = S1_in_S2.S2_radius_cm * sinf(radians(S1_in_S2.theta_rho_deg));
+    S1_in_S2.azimuth_deg = 0;
+    S1_in_S2.inclination_deg = 45;
+    S1_in_S2.orientation = 1;
 
     float theta = 90 - S1_in_S2.inclination_deg;
 
@@ -901,11 +903,20 @@ void Plane::do_loiter_3d()
     float cos_theta = cosf(radians(theta));
     float sin_theta = sinf(radians(theta));
 
-    Vector3f erc(sin_theta * cos_psi, sin_theta * sin_psi, - cos_theta);
-    Vector3f rc = erc * S1_in_S2.distance_cm;
+    S1_in_S2.ercv = Vector3f(sin_theta * cos_psi, sin_theta * sin_psi, - cos_theta);
+    //Vector3f rc = S1_in_S2.ercv * S1_in_S2.distance_cm;
+    //S1_in_S2.S1_loc = S1_in_S2.S2_loc;
+    //location_offset(S1_in_S2.S1_loc, rc.x/100.0f, rc.y/100.0f);
+    //S1_in_S2.S1_loc.alt = S1_in_S2.S1_loc.alt - rc.z;
 
-    location_offset(S1_in_S2.S2_loc, rc.x/100.0f, rc.y/100.0f);
-    S1_in_S2.S1_loc.alt = S1_in_S2.S2_loc.alt - rc.z;
+//    hal.console->print(S1_in_S2.S2_radius_cm);
+//    hal.console->print(" ");
+//    hal.console->println(S1_in_S2.theta_rho_deg);
+//    hal.console->print(S1_in_S2.ercv.x);
+//    hal.console->print(" ");
+//    hal.console->print(S1_in_S2.ercv.y);
+//    hal.console->print(" ");
+//    hal.console->print(S1_in_S2.ercv.z);
 
 
 };

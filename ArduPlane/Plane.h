@@ -671,11 +671,12 @@ private:
 
     struct circ_on_sphere {
         struct Location S2_loc;
-        struct Location S1_loc;
+        //struct Location S1_loc;
+        Vector3f ercv;
         int32_t S2_radius_cm;
         int32_t S1_radius_cm;
         int32_t distance_cm; // distance of center of the circle from the center of the sphere
-        float theta_rho_deg; // half of the pening angle of the cone with base S1
+        float theta_rho_deg; // half of the opening angle of the cone with base S1
         float azimuth_deg;
         float inclination_deg;
         int8_t orientation;

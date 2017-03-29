@@ -215,7 +215,27 @@ void Plane::update_loiter_ellipse()
 void Plane::update_loiter_3d()
 {
     // Christoph Sieg:
-    nav_controller->update_loiter_3d(S1_in_S2.S1_loc, S1_in_S2.S2_loc, S1_in_S2.S2_radius_cm, S1_in_S2.distance_cm, S1_in_S2.orientation, S1_in_S2.desired_loc);
+    //nav_controller->update_loiter_3d(S1_in_S2.S1_loc, S1_in_S2.S2_loc, S1_in_S2.S2_radius_cm, S1_in_S2.distance_cm, S1_in_S2.orientation, S1_in_S2.desired_loc);
+//    hal.console->print("S2_loc: ");
+//    hal.console->print(S1_in_S2.S2_loc.lat);
+//    hal.console->print(", ");
+//    hal.console->print(S1_in_S2.S2_loc.lng);
+//    hal.console->print(", ");
+//    hal.console->println(S1_in_S2.S2_loc.alt);
+//    hal.console->print("ercv: ");
+//    hal.console->print(S1_in_S2.ercv.x);
+//    hal.console->print(", ");
+//    hal.console->print(S1_in_S2.ercv.y);
+//    hal.console->print(", ");
+//    hal.console->println(S1_in_S2.ercv.z);
+//    hal.console->print("S2radius: ");
+//    hal.console->print(S1_in_S2.S2_radius_cm);
+//    hal.console->print("theta_rho: ");
+//    hal.console->print(S1_in_S2.theta_rho_deg);
+//    hal.console->print("orientation: ");
+//    hal.console->print(S1_in_S2.orientation);
+
+    nav_controller->update_loiter_3d(S1_in_S2.S2_loc, S1_in_S2.ercv, S1_in_S2.S2_radius_cm, S1_in_S2.theta_rho_deg, S1_in_S2.orientation, S1_in_S2.desired_loc);
     // Thomas Gehrmann:
     // nav_controller->update_loiter_3d(home, intersection.circle_center, intersection.circle_radius, intersection.psi_plane, intersection.theta_plane, eight_sphere.omega, eight_sphere.sigma, intersection.distance_cm, loiter.direction, intersection.rot_matrix_pe, eight_sphere.segment, intersection.desired_loc);
 
