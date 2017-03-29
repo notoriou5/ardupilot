@@ -356,8 +356,8 @@ public:
     AP_Int16 format_version;
     AP_Int8 software_type;
 
-    AP_Float omega_wind;
-    AP_Float sigma_wind;
+    AP_Float omega_wind;    // degrees
+    AP_Float sigma_wind;    // degrees
 
     // Telemetry control
     //
