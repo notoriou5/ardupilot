@@ -1188,7 +1188,7 @@ const AP_Param::Info Plane::var_info[] = {
     // @Description: Polarangle of figure-8 pattern, Sigma = 0 means figure-8 is on top of hemisphere
     // @Range: -90 90
     // @User: Advanced
-    GSCALAR(sigma_wind, "SIGMA_WIND_PARAMETER", SIGMA_WIND_DEFAULT),
+    GSCALAR(sigma_wind, "SIGMA_WIND", SIGMA_WIND_DEFAULT),
 
     AP_VAREND
 };
