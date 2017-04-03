@@ -1301,7 +1301,7 @@ void AP_L1_Control::update_loiter_3d(const struct Location &anchor, const struct
 
     float spring_const;
     float tether_length_demand;
-    if (_position_vec_ef.length() > 390) {
+    if (_position_vec_ef.length() > 120) {
         spring_const = 2;
     } else {
         spring_const = 0;
@@ -1420,8 +1420,8 @@ void AP_L1_Control::update_loiter_3d(const struct Location &anchor, const struct
         location_offset(desired_loc, v_ellipse_ef.x, v_ellipse_ef.y);
         //desired_loc.alt = dist * cos_sigma*cos_theta - 100.0f * v_ellipse_ef.z;
         desired_loc.alt = center_WP.alt - 100.0f * v_ellipse_ef.z;
-        //hal.console->print("height demanded: ");
-        //hal.console->println(height);
+        hal.console->print("height demanded: ");
+        hal.console->println(desired_loc.alt);
         _latAccDem = latAccDemCirc; //-9.81/_position_vec_ef.z*sqrtf(_position_vec_ef.length_squared()-_position_vec_ef.z*_position_vec_ef.z);
         _WPcircle = true;
         _bearing_error = 0.0f; // bearing error (radians), +ve to left of track
