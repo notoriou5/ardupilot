@@ -998,13 +998,13 @@ void Plane::do_loiter_3d()
 //    float LOCATION_SCALING_FACTOR_INV = 89.83204953368922;
 
     intersection.psi_plane = radians(0);
-    intersection.theta_plane = radians(0);//radians(-60);
+    intersection.theta_plane = radians(-60);
 
     // do not vary omega and sigma, they have just to be defined because of the do_eight_sphere() function
     eight_sphere.omega = radians(0);
     eight_sphere.sigma = radians(0);
 
-    intersection.distance_cm = 14000;
+    intersection.distance_cm = 16000;
 
     intersection.sphere_radius_cm = 20000;
 
