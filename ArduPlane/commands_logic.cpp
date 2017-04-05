@@ -909,17 +909,87 @@ void Plane::do_loiter_3d()
     //location_offset(S1_in_S2.S1_loc, rc.x/100.0f, rc.y/100.0f);
     //S1_in_S2.S1_loc.alt = S1_in_S2.S1_loc.alt - rc.z;
 
-//    hal.console->print(S1_in_S2.S2_radius_cm);
-//    hal.console->print(" ");
-//    hal.console->println(S1_in_S2.theta_rho_deg);
-//    hal.console->print(S1_in_S2.ercv.x);
-//    hal.console->print(" ");
-//    hal.console->print(S1_in_S2.ercv.y);
-//    hal.console->print(" ");
-//    hal.console->print(S1_in_S2.ercv.z);
-
-
 };
+
+void Plane::do_8_in_S2()
+{
+    8_in_S2.S2_loc = home;
+    8_in_S2.S2_radius_cm = 12000; // radius of the sphere in cm
+    8_in_S2.theta_c_deg = 30; // angle from the crossing point to the center of the turning circle in degrees
+    8_in_S2.theta_rho_deg = 20; // opening angle of the cone with tip at S2_loc and base given by the turning circle
+    8_in_S2.azimuth_deg = 0;
+    8_in_S2.inclination_deg = 45;
+    8_in_S2.orientation = 1;
+
+    float theta = 90 - S1_in_S2.inclination_deg;
+
+    float cos_psi = cosf(radians(S1_in_S2.azimuth_deg));
+    float sin_psi = sinf(radians(S1_in_S2.azimuth_deg));
+    float cos_theta = cosf(radians(theta));
+    float sin_theta = sinf(radians(theta));
+
+    // trigonometric functions of the opening angle
+    // ratio of distance of the turning circle plane and of the radius of the sphere
+    float cos_thetar = cosf(radians(8_in_S2.theta_rho_deg));
+    // ratio of the turning circle radius and of the radius of the sphere
+    float sin_thetar = sinf(radians(8_in_S2.theta_rho_deg));
+
+    // trigonometric functions of the polar angle of the center of the turning circle
+    float cos_thetac = cosf(radians(8_in_S2.theta_c_deg));
+    float sin_thetac = sinf(radians(8_in_S2.theta_c_deg));
+
+    // trigonometric functions of half of the crossing angle
+    float cos_chihalf = sqrt(1 - sq(sin_thetar/sin_thetac));
+    float sin_chihalf = sqrt(1 - sq(cos_chihalf));
+
+    // trigonometric functions of half of the sweeping angle of the geodesic segments
+    float cos_theta0 = cos_thetac/cos_thetar;
+    float sin_theta0 = sqrt(1 - sq(cos_theta0));
+
+    // canonical orientation of the figure-8-pattern at azimuth_deg =0, inclination_deg = 90 in the NED coordinate system:
+    // crossing point is upwards (in the (0,0,-1)-direction) from S2_loc;
+    // turning circle with orientation = +1 is in the eastern ((0, sin_thetac, -cos_thetac)-direction) from S2_loc;
+    // figure-8-pattern is given by the sequence geodesic_1 -> circle_1 -> geodesic_2 -> circle_2 for orientation = 1
+
+    // unit normal vector of the first turning circle plane (pointing to the center of the first turning circle)
+    8_in_S2.erc1v = Vector3f(0, sin_thetac, -cos_thetac);
+    8_in_S2.orientationc1 = 8_in_S2.orientation;
+    // unit normal vector of the second turning circle plane (pointing to the center of the second turning circle)
+    8 in S2.erc2v = Vector3f(0, -sin_thetac, 0, -cos_thetac);
+    8_in_S2.orientationc2 = -8_in_S2.orientation;
+    // unit normal vector of the first geodesic segment (from south-west to north-east)
+    8_in_S2.erg1v = Vector3f(-cos_chihalf, 0, sin_chihalf);
+    // orientation given by applying the right-hand-rule in the opposite direction of the unit normal vector
+    8_in_S2.orientationg1 = -8_in_S2.orientation;
+    // unit normal vector of the second geodesic segment (from south-east to north-west)
+    8_in_S2.erg2v = Vector3f(cos_chihalf, 0, sin_chihalf);
+    // orientation given by applying the right-hand-rule in the opposite direction of the unit normal vector
+    8_in_S2.orientationg2 = -8_in_S2.orientation;
+    //
+
+    // tangent vectors at the transgression points between the segments
+    const Vector3f etg1c1(cos_theta0 * sin_chihalf, cos_theta0 * cos_chihalf, sin_theta0);
+    const Vector3f etc1g2(cos_theta0 * sin_chihalf, -cos_theta0 * cos_chihalf, -sin_theta0);
+    const Vector3f etg2c2(cos_theta0 * sin_chihalf, -cos_theta0 * cos_chihalf, sin_theta0);
+    const Vector3f etc2g1(cos_theta0 * sin_chihalf, cos_theta0 * cos_chihalf, -sin_theta0);
+
+    // generic orientation with crossing point in the (sin_theta * cos_psi, sin_theta * sin_psi, - cos_theta)-direction is obtained by applying the rotation
+    //
+    // unit vector in radial direction
+    Vector3f erv(sin_theta * cos_psi, sin_theta * sin_psi, - cos_theta);
+    // unit vector in polar direction
+    Vector3f ethetav(cos_theta * cos_psi, cos_theta * sin_psi, sin_theta);
+    // unit vector in azimuthal direction
+    Vector3f epsiv(- sin_psi, cos_psi, 0);
+    // rotation matrix
+    Matrix3f Rm(ethetav, epsiv, -erv);
+
+
+    8_in_S2.ercv = Vector3f(sin_theta * cos_psi, sin_theta * sin_psi, - cos_theta);
+
+
+}
+
 
 // Thomas Gehrmann:
 //void Plane::do_loiter_3d()
