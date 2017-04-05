@@ -34,6 +34,20 @@ public:
                                         float hgt_afe,
 										float load_factor) = 0;
 
+
+	// Modified version for flight mode EIGHT_SPHERE
+    virtual void update_pitch_throttle( int32_t hgt_dem_cm,
+                                        int32_t EAS_dem_cm,
+                                        enum AP_Vehicle::FixedWing::FlightStage flight_stage,
+                                        float distance_beyond_land_wp,
+                                        int32_t ptchMinCO_cd,
+                                        int16_t throttle_nudge,
+                                        float hgt_afe,
+                                        float load_factor,
+                                        int32_t segment) = 0;
+
+
+
 	// demanded throttle in percentage
 	// should return 0 to 100
 	virtual int32_t get_throttle_demand(void)=0;

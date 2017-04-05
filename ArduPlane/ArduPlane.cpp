@@ -932,6 +932,19 @@ void Plane::update_alt()
             distance_beyond_land_wp = get_distance(current_loc, next_WP_loc);
         }
 
+
+        if (control_mode == LOITER_3D || EIGHT_SPHERE) {
+            SpdHgt_Controller->update_pitch_throttle(relative_target_altitude_cm(),
+                                                     target_airspeed_cm,
+                                                     flight_stage,
+                                                     distance_beyond_land_wp,
+                                                     get_takeoff_pitch_min_cd(),
+                                                     throttle_nudge,
+                                                     tecs_hgt_afe(),
+                                                     aerodynamic_load_factor,
+                                                     eight_sphere.segment);
+
+        } else {
         SpdHgt_Controller->update_pitch_throttle(relative_target_altitude_cm(),
                                                  target_airspeed_cm,
                                                  flight_stage,
@@ -940,6 +953,7 @@ void Plane::update_alt()
                                                  throttle_nudge,
                                                  tecs_hgt_afe(),
                                                  aerodynamic_load_factor);
+        }
     }
 }
 

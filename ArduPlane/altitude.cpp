@@ -59,11 +59,11 @@ void Plane::adjust_altitude_target()
 //    }
       if (control_mode == LOITER_3D || control_mode == EIGHT_SPHERE) {
           // Christoph Sieg:
-          set_target_altitude_location(S1_in_S2.desired_loc);
+          // set_target_altitude_location(S1_in_S2.desired_loc);
           // Thomas Gehrmann:
           // set_target_altitude(intersection.height);
-          //hal.console->println(intersection.desired_loc.alt);
-          //set_target_altitude_location(intersection.desired_loc);
+          hal.console->println(intersection.desired_loc.alt);
+          set_target_altitude_location(intersection.desired_loc);
     }
 
     altitude_error_cm = calc_altitude_error_cm();

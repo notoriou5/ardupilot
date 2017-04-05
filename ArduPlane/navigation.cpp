@@ -235,9 +235,34 @@ void Plane::update_loiter_3d()
 //    hal.console->print("orientation: ");
 //    hal.console->print(S1_in_S2.orientation);
 
-    nav_controller->update_loiter_3d(S1_in_S2.S2_loc, S1_in_S2.ercv, S1_in_S2.S2_radius_cm, S1_in_S2.theta_rho_deg, S1_in_S2.orientation, S1_in_S2.desired_loc);
+    //nav_controller->update_loiter_3d(S1_in_S2.S2_loc, S1_in_S2.ercv, S1_in_S2.S2_radius_cm, S1_in_S2.theta_rho_deg, S1_in_S2.orientation, S1_in_S2.desired_loc);
     // Thomas Gehrmann:
-    // nav_controller->update_loiter_3d(home, intersection.circle_center, intersection.circle_radius, intersection.psi_plane, intersection.theta_plane, eight_sphere.omega, eight_sphere.sigma, intersection.distance_cm, loiter.direction, intersection.rot_matrix_pe, eight_sphere.segment, intersection.desired_loc);
+     nav_controller->update_loiter_3d(home, intersection.circle_center, intersection.circle_radius, intersection.psi_plane, intersection.theta_plane, eight_sphere.omega, eight_sphere.sigma, intersection.distance_cm, loiter.direction, intersection.rot_matrix_pe, eight_sphere.segment, intersection.desired_loc);
+
+//     hal.console->print(location_diff(home,intersection.circle_center).x);
+//     hal.console->print(" ");
+//     hal.console->println(location_diff(home,intersection.circle_center).x);
+//     hal.console->print(intersection.circle_radius);
+//     hal.console->print("psi: ");
+//     hal.console->print(intersection.psi_plane);
+//     hal.console->print("theta: ");
+//     hal.console->print(intersection.theta_plane);
+//     hal.console->print("omega: ");
+//     hal.console->print(eight_sphere.omega);
+//     hal.console->print("sigma: ");
+//     hal.console->println(eight_sphere.sigma);
+//     hal.console->print("distance: ");
+//     hal.console->print(intersection.distance_cm);
+//     hal.console->print("direction: ");
+//     hal.console->print(loiter.direction);
+//     hal.console->print("segment: ");
+//     hal.console->println(eight_sphere.segment);
+//     hal.console->print("desired_loc.alt: ");
+//     hal.console->println(intersection.desired_loc.alt);
+
+
+
+
 
 }
 
