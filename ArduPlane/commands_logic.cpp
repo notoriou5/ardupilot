@@ -998,15 +998,15 @@ void Plane::do_loiter_3d()
 //    float LOCATION_SCALING_FACTOR_INV = 89.83204953368922;
 
     intersection.psi_plane = radians(0);
-    intersection.theta_plane = radians(-60);
+    intersection.theta_plane = radians(-0);
 
     // do not vary omega and sigma, they have just to be defined because of the do_eight_sphere() function
     eight_sphere.omega = radians(0);
     eight_sphere.sigma = radians(0);
 
-    intersection.distance_cm = 16000;
+    intersection.distance_cm = 15000;
 
-    intersection.sphere_radius_cm = 20000;
+    intersection.sphere_radius_cm = 18000;
 
     float cos_psi = cosf(intersection.psi_plane);
     float cos_theta = cosf(intersection.theta_plane);
@@ -1046,15 +1046,15 @@ void Plane::do_eight_sphere()
 //    float LOCATION_SCALING_FACTOR_INV = 89.83204953368922;
 
     // define the shape of eight
-    eight_sphere.cross_angle = radians(20);
-    eight_sphere.arc_length_angle = radians(20);
+    eight_sphere.cross_angle = radians(30);
+    eight_sphere.arc_length_angle = radians(30);
 
     // orientation of eight
-    eight_sphere.omega = radians(g.omega_wind);
+    eight_sphere.omega = radians(0);//radians(g.omega_wind);
     eight_sphere.omega_old = g.omega_wind;
-    eight_sphere.sigma = radians(g.sigma_wind);
+    eight_sphere.sigma = radians(0);//radians(g.sigma_wind);
 
-    intersection.sphere_radius_cm = 12000;
+    intersection.sphere_radius_cm = 24000;
 
     float cos_cross = cosf(eight_sphere.cross_angle);
     float cos_arc = cosf(eight_sphere.arc_length_angle);
