@@ -565,9 +565,9 @@ void AP_L1_Control::update_loiter_ellipse(const struct Location &center_loc, con
 
     //Sum PD control and centripetal acceleration to calculate lateral manoeuvre demand
     float latAccDemCirc = orientation * (latAccDemCircPD + latAccDemCircCtr);
-    hal.console->print(latAccDemCircPD);
-    hal.console->print(" ");
-    hal.console->println(latAccDemCircCtr);
+    //hal.console->print(latAccDemCircPD);
+    //hal.console->print(" ");
+    //hal.console->println(latAccDemCircCtr);
 
     // Perform switchover between 'capture' and 'circle' modes at the
     // point where the commands cross over to achieve a seamless transfer
@@ -1207,6 +1207,19 @@ void AP_L1_Control::update_loiter_3d(const struct Location &S2center, const Vect
 ////    f.close();
 //}
 
+// fly along an inclined circle that is built as intersection of a plane with a sphere S^2
+// code: Thomas Gehrmann, slight modifications: Christoph Sieg
+// some details can be found in Thomas' master thesis and in
+// Bechtle, Gehrmann, Sieg, Zillmann: AWEsome: an open test platform for Airborne Wind Energy systems
+// parameters:
+// S^2 is centered at anchor and has radius radius
+// The plane contains the circle center center_WP and is defined via its normal vector parameterized by azimuth psi and polar angle theta
+// the angles w and sigma are the azimuth and polar angle that parameterize an additional rotation (in case that update_loiter_3d is used for describing a figure-eight pattern)
+// loiter direction: +1/-1 flying clockwise/counter clockwise seen from above
+// Mpe: rotation matrix for transforming from the NED coordinate system to the coordinate system of the (inclined) plane
+// segment: specifies the circle segment in case of figure-eight pattern
+// desired loc: returns the desired location (height) as input for the controller
+
 void AP_L1_Control::update_loiter_3d(const struct Location &anchor, const struct Location &center_WP, float radius, float psi, float theta, float w, float sigma, int32_t dist, int8_t loiter_direction, Matrix3f M_pe, int32_t segment, struct Location &desired_loc)
 {
     struct Location _current_loc;
@@ -1256,9 +1269,9 @@ void AP_L1_Control::update_loiter_3d(const struct Location &anchor, const struct
     A_air.x = A_air_pf.x;
     A_air.y = A_air_pf.y;
 
-    hal.console->print(A_air.x);
-    hal.console->print(" ");
-    hal.console->println(A_air.y);
+    //hal.console->print(A_air.x);
+    //hal.console->print(" ");
+    //hal.console->println(A_air.y);
     // Calculate the unit vector from WP A to aircraft
     // protect against being on the waypoint and having zero velocity
     // if too close to the waypoint, use the velocity vector
@@ -1527,7 +1540,7 @@ void AP_L1_Control::update_loiter_3d(const struct Location &anchor, const struct
         //hal.console->print("height demanded: ");
         //hal.console->println(height);
         // determine the location of the desired point on the circle
-        hal.console->println(segment);
+        //hal.console->println(segment);
         desired_loc = center_WP;
         location_offset(desired_loc, v_ellipse_ef.x, v_ellipse_ef.y);
         //desired_loc.alt = dist * cos_sigma*cos_theta - 100.0f * v_ellipse_ef.z;
@@ -1536,7 +1549,7 @@ void AP_L1_Control::update_loiter_3d(const struct Location &anchor, const struct
         _WPcircle = true;
         _bearing_error = 0.0f; // bearing error (radians), +ve to left of track
         _nav_bearing = wrap_2PI(atan2f(A_air_unit.y , A_air_unit.x)); // bearing (radians)from AC to Minimum point of circle
-        hal.console->println(degrees(_nav_bearing));
+        //hal.console->println(degrees(_nav_bearing));
         //hal.console->print("pitch: ");
         //hal.console->println(_ahrs.pitch_sensor/100.0f);
         //hal.console->println(nav_bearing_cd());

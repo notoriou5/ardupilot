@@ -992,7 +992,8 @@ void Plane::do_loiter_ellipse()
 //}
 
 
-// Thomas Gehrmann:
+// initialization of an inclined circle S^1, whose center point is located in the direction parameterized by azimuth psi and inclination theta
+// code: Thomas Gehrmann, modification: Christoph Sieg
 void Plane::do_loiter_3d()
 {
 //    float LOCATION_SCALING_FACTOR_INV = 89.83204953368922;
@@ -1041,6 +1042,8 @@ void Plane::do_loiter_3d()
 
 }
 
+// initialization of an inclined figure-eight pattern on a sphere S^2, whose crossing point is located in the direction parameterized by azimuth w and inclination sigma
+// code: Thomas Gehrmann, slight modifications: Christoph Sieg
 void Plane::do_eight_sphere()
 {
 //    float LOCATION_SCALING_FACTOR_INV = 89.83204953368922;
@@ -1050,9 +1053,9 @@ void Plane::do_eight_sphere()
     eight_sphere.arc_length_angle = radians(30);
 
     // orientation of eight
-    eight_sphere.omega = radians(0);//radians(g.omega_wind);
+    eight_sphere.omega = radians(00);//radians(g.omega_wind);
     eight_sphere.omega_old = g.omega_wind;
-    eight_sphere.sigma = radians(0);//radians(g.sigma_wind);
+    eight_sphere.sigma = radians(30);//radians(g.sigma_wind);
 
     intersection.sphere_radius_cm = 24000;
 
