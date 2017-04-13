@@ -289,7 +289,7 @@ void Plane::update_eight_sphere()
         nav_controller->update_loiter_3d(home, eight_sphere.circle_center_left, intersection.circle_radius, M_PI/2, eight_sphere.eta, eight_sphere.omega, eight_sphere.sigma, intersection.distance_cm, 1, eight_sphere.rot_matrix_left, eight_sphere.segment, intersection.desired_loc);
 
         int32_t nav_bearing = nav_controller->nav_bearing_cd();
-        // the follwing code is reverting the effect of wrap_180_cd within nav_bearing_cd();
+        // the following code is reverting the effect of wrap_180_cd within nav_bearing_cd();
         if(nav_bearing < 0) {nav_bearing = 36000 + nav_bearing;}
         //hal.console->println("nav_bearing");
         //hal.console->println(nav_bearing);
@@ -339,7 +339,7 @@ void Plane::update_eight_sphere()
         nav_controller->update_loiter_3d(home, eight_sphere.circle_center_right, intersection.circle_radius, -M_PI/2, eight_sphere.eta, eight_sphere.omega, eight_sphere.sigma, intersection.distance_cm, -1, eight_sphere.rot_matrix_right, eight_sphere.segment, intersection.desired_loc);
 
         int32_t nav_bearing = nav_controller->nav_bearing_cd();
-        // the follwing code is reverting the effect of wrap_180_cd within nav_bearing_cd();
+        // the following code is reverting the effect of wrap_180_cd within nav_bearing_cd();
         if(nav_bearing < 0) {nav_bearing = 36000 + nav_bearing;}
         //hal.console->println("nav_bearing");
         //hal.console->println(nav_bearing);
