@@ -260,11 +260,18 @@ void Plane::update_loiter_3d()
 //     hal.console->print("desired_loc.alt: ");
 //     hal.console->println(intersection.desired_loc.alt);
 
-
-
-
-
 }
+
+//// code: Christoph Sieg
+//void Plane::update_eight_sphere() {
+//
+//  // switch to correct segment in dependence of position and velocity of the aircraft
+//  eight_in_S2.set_current_segment(eight_in_S2.Rm.mul_transpose(rav) * rav, eight_in_S2.Rm.mul_transpose(vav));
+//  // navigate along selected segment
+//  nav_controller->update_loiter_3d(eight_in_S2.S2_loc, eight_in_S2.segments_ercv[eight_in_S2.current_segment], eight_in_S2.S2_radius_cm, eight_in_S2.segments_theta_r[eight_in_S2.current_segment], eight_in_S2.segments_orientation[eight_in_S2.current_segment], eight_in_S2.desired_loc);
+//
+//}
+
 
 // routine that switches between the four circle segments of which the figure-eight pattern consists
 // code: Thomas Gehrmann, slight modifications: Christoph Sieg

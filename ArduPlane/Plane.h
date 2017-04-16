@@ -754,7 +754,7 @@ private:
       Vector3f epsixv = Vector3f(-sin_psi, cos_psi, 0);
       // rotation matrix that yields the vectors of the figure_eight pattern with crossing point in the direction _erxv
       // from those of the figure-eight pattern with crossing point at _erv = (0,0,-1) and turning circle centers on the east axis
-      Matrix3f _Rm = Matrix3f(ethetaxv, epsixv, -erxv);
+      Matrix3f Rm = Matrix3f(ethetaxv, epsixv, -erxv);
       // vector pointing from S2_loc to the crossing point
       Vector3f rxv = erxv * dist_cm / 100.0f;
 
@@ -903,7 +903,8 @@ private:
 
 
 
-      struct {
+// code: Thomas Gehrmann
+    struct {
         // rotation around e_z and e_y
         float psi_plane;
         float theta_plane;
@@ -925,6 +926,7 @@ private:
 
     } intersection;
 
+// code: Thomas Gehrmann
     struct {
 
         float omega;              // rotation of eight around e_z in ef, omega equals winddirection

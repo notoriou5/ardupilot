@@ -885,31 +885,31 @@ void Plane::do_loiter_ellipse()
 }
 
 
-// code: Christoph Sieg:
-void Plane::do_loiter_3d()
-{
-    S1_in_S2.S2_loc = home;
-    S1_in_S2.S2_radius_cm = 40000;
-    S1_in_S2.theta_rho_deg = 20;
-    S1_in_S2.S1_radius_cm = S1_in_S2.S2_radius_cm * sinf(radians(S1_in_S2.theta_rho_deg));
-    S1_in_S2.azimuth_deg = 0;
-    S1_in_S2.inclination_deg = 45;
-    S1_in_S2.orientation = 1;
-
-    float theta = 90 - S1_in_S2.inclination_deg;
-
-    float cos_psi = cosf(radians(S1_in_S2.azimuth_deg));
-    float sin_psi = sinf(radians(S1_in_S2.azimuth_deg));
-    float cos_theta = cosf(radians(theta));
-    float sin_theta = sinf(radians(theta));
-
-    S1_in_S2.ercv = Vector3f(sin_theta * cos_psi, sin_theta * sin_psi, - cos_theta);
-    //Vector3f rc = S1_in_S2.ercv * S1_in_S2.distance_cm;
-    //S1_in_S2.S1_loc = S1_in_S2.S2_loc;
-    //location_offset(S1_in_S2.S1_loc, rc.x/100.0f, rc.y/100.0f);
-    //S1_in_S2.S1_loc.alt = S1_in_S2.S1_loc.alt - rc.z;
-
-};
+//// code: Christoph Sieg:
+//void Plane::do_loiter_3d()
+//{
+//    S1_in_S2.S2_loc = home;
+//    S1_in_S2.S2_radius_cm = 40000;
+//    S1_in_S2.theta_rho_deg = 20;
+//    S1_in_S2.S1_radius_cm = S1_in_S2.S2_radius_cm * sinf(radians(S1_in_S2.theta_rho_deg));
+//    S1_in_S2.azimuth_deg = 0;
+//    S1_in_S2.inclination_deg = 45;
+//    S1_in_S2.orientation = 1;
+//
+//    float theta = 90 - S1_in_S2.inclination_deg;
+//
+//    float cos_psi = cosf(radians(S1_in_S2.azimuth_deg));
+//    float sin_psi = sinf(radians(S1_in_S2.azimuth_deg));
+//    float cos_theta = cosf(radians(theta));
+//    float sin_theta = sinf(radians(theta));
+//
+//    S1_in_S2.ercv = Vector3f(sin_theta * cos_psi, sin_theta * sin_psi, - cos_theta);
+//    //Vector3f rc = S1_in_S2.ercv * S1_in_S2.distance_cm;
+//    //S1_in_S2.S1_loc = S1_in_S2.S2_loc;
+//    //location_offset(S1_in_S2.S1_loc, rc.x/100.0f, rc.y/100.0f);
+//    //S1_in_S2.S1_loc.alt = S1_in_S2.S1_loc.alt - rc.z;
+//
+//};
 
 //void Plane::do_8_in_S2()
 //{
@@ -991,194 +991,194 @@ void Plane::do_loiter_3d()
 //}
 
 
-//// initialization of an inclined circle S^1, whose center point is located in the direction parameterized by azimuth psi and inclination theta
-//// code: Thomas Gehrmann, modification: Christoph Sieg
-//void Plane::do_loiter_3d()
-//{
-////    float LOCATION_SCALING_FACTOR_INV = 89.83204953368922;
-//
-//    intersection.psi_plane = radians(0);
-//    intersection.theta_plane = radians(-0);
-//
-//    // do not vary omega and sigma, they have just to be defined because of the do_eight_sphere() function
-//    eight_sphere.omega = radians(0);
-//    eight_sphere.sigma = radians(0);
-//
-//    intersection.distance_cm = 15000;
-//
-//    intersection.sphere_radius_cm = 18000;
-//
-//    float cos_psi = cosf(intersection.psi_plane);
-//    float cos_theta = cosf(intersection.theta_plane);
-//    float sin_psi = sinf(intersection.psi_plane);
-//    float sin_theta = sinf(intersection.theta_plane);
-//
-//    intersection.normal_vec.x = - sin_theta * cos_psi;
-//    intersection.normal_vec.y = - sin_theta * sin_psi;
-//    intersection.normal_vec.z = - cos_theta;
-//
-//    intersection.circle_radius = sqrtf(intersection.sphere_radius_cm/100.0f * intersection.sphere_radius_cm/100.0f - intersection.distance_cm/100.0f * intersection.distance_cm/100.0f);
-//
-//    intersection.eccent = sin_theta;
-//
-//    intersection.circle_center = home;
-//    intersection.circle_center.lat += intersection.distance_cm/100.0f * intersection.normal_vec.x * LOCATION_SCALING_FACTOR_INV;
-//    intersection.circle_center.lng += intersection.distance_cm/100.0f * intersection.normal_vec.y * LOCATION_SCALING_FACTOR_INV / longitude_scale(home);
-//    intersection.circle_center.alt -= intersection.distance_cm * intersection.normal_vec.z;
-//
-//    intersection.rot_matrix_pe.a.x = cos_theta * cos_psi;
-//    intersection.rot_matrix_pe.a.y = cos_theta * sin_psi;
-//    intersection.rot_matrix_pe.a.z = -sin_theta;
-//    intersection.rot_matrix_pe.b.x = -sin_psi;
-//    intersection.rot_matrix_pe.b.y = cos_psi;
-//    intersection.rot_matrix_pe.b.z = 0;
-//    intersection.rot_matrix_pe.c.x = sin_theta * cos_psi;
-//    intersection.rot_matrix_pe.c.y = sin_theta * sin_psi;
-//    intersection.rot_matrix_pe.c.z = cos_theta;
-//
-//
-//    loiter.direction = -1;
-//
-//}
-//
-// code: Christoph Sieg
-void Plane::do_eight_sphere()
+// initialization of an inclined circle S^1, whose center point is located in the direction parameterized by azimuth psi and inclination theta
+// code: Thomas Gehrmann, modification: Christoph Sieg
+void Plane::do_loiter_3d()
 {
-    eight_in_S2.S2_loc = home; // location of the center of the S2
-    eight_in_S2.S2_radius_cm = 12000; // radius of the S2 in cm
-    eight_in_S2.theta_c_deg = 60; // half of the angle between the centers of the two turning circle segments, range: [0,90] degrees
-    eight_in_S2.theta_r_deg = 15; // opening angle of the cone with tip at S2_loc and base given by the turning circle, range: [0,90-theta_c_deg] degrees in order to guarantee that the sweeping angle between the two apices is less than 180 deg.
-    eight_in_S2.azimuth_deg = 0; // azimuth angle of the vector pointing from S2_loc to the crossing point of the figure-eight pattern, range: [0,360]
-    eight_in_S2.inclination_deg = 90; // inclination angle of the vector pointing from S2_loc to the crossing point of the figure-eight pattern, range [0,90]
-    eight_in_S2.orientation=1; // orientation of the figure-eight pattern: +1: downwards flight on geodesic, upwards flight on turning circle segments
-                      //                                          -1: upwards flight on geodesic, downwards flight on turning circle segments
+//    float LOCATION_SCALING_FACTOR_INV = 89.83204953368922;
 
-    // the four segments are labeled by integers 1,2,3,4 in dependence of orientation
-    // for orientation of the figure-eight pattern: +1: segments are geodesic_1 -> circle_1 -> geodesic_2 -> circle_2
-    //                                              -1: segments are geodesic_1 -> circle_2 -> geodesic_2 -> circle_1
-    eight_in_S2.current_segment=1; // sets the start segment when eight_sphere is initialized
+    intersection.psi_plane = radians(0);
+    intersection.theta_plane = radians(-0);
+
+    // do not vary omega and sigma, they have just to be defined because of the do_eight_sphere() function
+    eight_sphere.omega = radians(0);
+    eight_sphere.sigma = radians(0);
+
+    intersection.distance_cm = 15000;
+
+    intersection.sphere_radius_cm = 18000;
+
+    float cos_psi = cosf(intersection.psi_plane);
+    float cos_theta = cosf(intersection.theta_plane);
+    float sin_psi = sinf(intersection.psi_plane);
+    float sin_theta = sinf(intersection.theta_plane);
+
+    intersection.normal_vec.x = - sin_theta * cos_psi;
+    intersection.normal_vec.y = - sin_theta * sin_psi;
+    intersection.normal_vec.z = - cos_theta;
+
+    intersection.circle_radius = sqrtf(intersection.sphere_radius_cm/100.0f * intersection.sphere_radius_cm/100.0f - intersection.distance_cm/100.0f * intersection.distance_cm/100.0f);
+
+    intersection.eccent = sin_theta;
+
+    intersection.circle_center = home;
+    intersection.circle_center.lat += intersection.distance_cm/100.0f * intersection.normal_vec.x * LOCATION_SCALING_FACTOR_INV;
+    intersection.circle_center.lng += intersection.distance_cm/100.0f * intersection.normal_vec.y * LOCATION_SCALING_FACTOR_INV / longitude_scale(home);
+    intersection.circle_center.alt -= intersection.distance_cm * intersection.normal_vec.z;
+
+    intersection.rot_matrix_pe.a.x = cos_theta * cos_psi;
+    intersection.rot_matrix_pe.a.y = cos_theta * sin_psi;
+    intersection.rot_matrix_pe.a.z = -sin_theta;
+    intersection.rot_matrix_pe.b.x = -sin_psi;
+    intersection.rot_matrix_pe.b.y = cos_psi;
+    intersection.rot_matrix_pe.b.z = 0;
+    intersection.rot_matrix_pe.c.x = sin_theta * cos_psi;
+    intersection.rot_matrix_pe.c.y = sin_theta * sin_psi;
+    intersection.rot_matrix_pe.c.z = cos_theta;
+
+
+    loiter.direction = -1;
 
 }
-
-//// initialization of an inclined figure-eight pattern on a sphere S^2, whose crossing point is located in the direction parameterized by azimuth w and inclination sigma
-//// code: Thomas Gehrmann, slight modifications: Christoph Sieg
+//
+//// code: Christoph Sieg
 //void Plane::do_eight_sphere()
 //{
-////    float LOCATION_SCALING_FACTOR_INV = 89.83204953368922;
+//    eight_in_S2.S2_loc = home; // location of the center of the S2
+//    eight_in_S2.S2_radius_cm = 12000; // radius of the S2 in cm
+//    eight_in_S2.theta_c_deg = 60; // half of the angle between the centers of the two turning circle segments, range: [0,90] degrees
+//    eight_in_S2.theta_r_deg = 15; // opening angle of the cone with tip at S2_loc and base given by the turning circle, range: [0,90-theta_c_deg] degrees in order to guarantee that the sweeping angle between the two apices is less than 180 deg.
+//    eight_in_S2.azimuth_deg = 0; // azimuth angle of the vector pointing from S2_loc to the crossing point of the figure-eight pattern, range: [0,360]
+//    eight_in_S2.inclination_deg = 90; // inclination angle of the vector pointing from S2_loc to the crossing point of the figure-eight pattern, range [0,90]
+//    eight_in_S2.orientation=1; // orientation of the figure-eight pattern: +1: downwards flight on geodesic, upwards flight on turning circle segments
+//                      //                                          -1: upwards flight on geodesic, downwards flight on turning circle segments
 //
-//    // define the shape of eight
-//    eight_sphere.cross_angle = radians(30);
-//    eight_sphere.arc_length_angle = radians(30);
-//
-//    // orientation of eight
-//    eight_sphere.omega = radians(00);//radians(g.omega_wind);
-//    eight_sphere.omega_old = g.omega_wind;
-//    eight_sphere.sigma = radians(30);//radians(g.sigma_wind);
-//
-//    intersection.sphere_radius_cm = 24000;
-//
-//    float cos_cross = cosf(eight_sphere.cross_angle);
-//    float cos_arc = cosf(eight_sphere.arc_length_angle);
-//    float sin_cross = sinf(eight_sphere.cross_angle);
-//    float sin_arc = sinf(eight_sphere.arc_length_angle);
-//
-//    float cos_omega = cosf(eight_sphere.omega);
-//    float cos_sigma = cosf(eight_sphere.sigma);
-//    float sin_omega = sinf(eight_sphere.omega);
-//    float sin_sigma = sinf(eight_sphere.sigma);
-//
-//    eight_sphere.eta = atanf(sin_arc/(cos_arc*cos_cross));
-//    float sin_eta = sinf(eight_sphere.eta);
-//    float cos_eta = cosf(eight_sphere.eta);
-//
-// /*   eight_sphere.rot_8_matrix.a.x = cos_omega*cos_sigma;
-//    eight_sphere.rot_8_matrix.a.y = -sin_omega*cos_sigma;
-//    eight_sphere.rot_8_matrix.a.z = sin_sigma;
-//    eight_sphere.rot_8_matrix.b.x = sin_omega;
-//    eight_sphere.rot_8_matrix.b.y = cos_omega;
-//    eight_sphere.rot_8_matrix.b.z = 0;
-//    eight_sphere.rot_8_matrix.c.x = -cos_omega*sin_sigma;
-//    eight_sphere.rot_8_matrix.c.y = sin_omega*sin_sigma;
-//    eight_sphere.rot_8_matrix.c.z = cos_sigma;  */
-//
-//
-//    intersection.distance_cm = intersection.sphere_radius_cm *(sin_eta*cos_cross*sin_arc + cos_eta*cos_arc);
-//
-//    intersection.circle_radius = sqrtf(intersection.sphere_radius_cm/100.0f * intersection.sphere_radius_cm/100.0f - intersection.distance_cm/100.0f * intersection.distance_cm/100.0f);
-//
-//    eight_sphere.secant = 2*intersection.sphere_radius_cm/100*sin_cross*sin_arc;
-//    eight_sphere.sector_angle = acosf(eight_sphere.secant/(2*intersection.circle_radius));
-//
-//    eight_sphere.normal_vec.x = sin_omega*sin_eta - cos_omega*sin_sigma*cos_eta;        // product of rot_8_matrix times vector (0, -sin_eta, -cos_eta)^T
-//    eight_sphere.normal_vec.y = -cos_omega*sin_eta - sin_omega*sin_sigma*cos_eta;       // normal_vec of left turning circle
-//    eight_sphere.normal_vec.z = -cos_sigma*cos_eta;
-//
-//    eight_sphere.circle_center_left = home;
-//    eight_sphere.circle_center_left.lat += intersection.distance_cm/100.0f * eight_sphere.normal_vec.x * LOCATION_SCALING_FACTOR_INV;
-//    eight_sphere.circle_center_left.lng += intersection.distance_cm/100.0f * eight_sphere.normal_vec.y * LOCATION_SCALING_FACTOR_INV / longitude_scale(home);
-//    eight_sphere.circle_center_left.alt -= intersection.distance_cm * eight_sphere.normal_vec.z;
-//
-//    eight_sphere.normal_vec.x = -sin_omega*sin_eta - cos_omega*sin_sigma*cos_eta;       // product of rot_8_matrix times vector (0, sin_eta, -cos_eta)^T
-//    eight_sphere.normal_vec.y = cos_omega*sin_eta - sin_omega*sin_sigma*cos_eta;        // normal_vec of right turning circle
-//    eight_sphere.normal_vec.z = -cos_sigma*cos_eta;
-//
-//    eight_sphere.circle_center_right = home;
-//    eight_sphere.circle_center_right.lat += intersection.distance_cm/100.0f * eight_sphere.normal_vec.x * LOCATION_SCALING_FACTOR_INV;
-//    eight_sphere.circle_center_right.lng += intersection.distance_cm/100.0f * eight_sphere.normal_vec.y * LOCATION_SCALING_FACTOR_INV / longitude_scale(home);
-//    eight_sphere.circle_center_right.alt -= intersection.distance_cm * eight_sphere.normal_vec.z;
-//
-//    hal.console->print("right.lat: ");
-//    hal.console->println( eight_sphere.circle_center_right.lat);
-//    hal.console->print("right.lng: ");
-//    hal.console->println( eight_sphere.circle_center_right.lng);
-//    hal.console->print("left.lat: ");
-//    hal.console->println( eight_sphere.circle_center_left.lat);
-//    hal.console->print("left.lng: ");
-//    hal.console->println( eight_sphere.circle_center_left.lng);
-//
-//    eight_sphere.rot_matrix_right.a.x = sin_omega*cos_eta - cos_omega*sin_sigma*sin_eta;
-//    eight_sphere.rot_matrix_right.a.y = -cos_omega*cos_eta - sin_omega*sin_sigma*sin_eta;
-//    eight_sphere.rot_matrix_right.a.z = -cos_sigma*sin_eta;
-//    eight_sphere.rot_matrix_right.b.x = cos_omega*cos_sigma;
-//    eight_sphere.rot_matrix_right.b.y = sin_omega*cos_sigma;
-//    eight_sphere.rot_matrix_right.b.z = -sin_sigma;
-//    eight_sphere.rot_matrix_right.c.x = sin_omega*sin_eta + cos_omega*sin_sigma*cos_eta;
-//    eight_sphere.rot_matrix_right.c.y = -cos_omega*sin_eta + sin_omega*sin_sigma*cos_eta;
-//    eight_sphere.rot_matrix_right.c.z = cos_sigma*cos_eta;
-//
-//    eight_sphere.rot_matrix_left.a.x = -sin_omega*cos_eta - cos_omega*sin_sigma*sin_eta;
-//    eight_sphere.rot_matrix_left.a.y = cos_omega*cos_eta - sin_omega*sin_sigma*sin_eta;
-//    eight_sphere.rot_matrix_left.a.z = -cos_sigma*sin_eta;
-//    eight_sphere.rot_matrix_left.b.x = -cos_omega*cos_sigma;
-//    eight_sphere.rot_matrix_left.b.y = -sin_omega*cos_sigma;
-//    eight_sphere.rot_matrix_left.b.z = sin_sigma;
-//    eight_sphere.rot_matrix_left.c.x = -sin_omega*sin_eta + cos_omega*sin_sigma*cos_eta;
-//    eight_sphere.rot_matrix_left.c.y = cos_omega*sin_eta + sin_omega*sin_sigma*cos_eta;
-//    eight_sphere.rot_matrix_left.c.z = cos_sigma*cos_eta;
-//
-//    eight_sphere.rot_matrix_cross1.a.x = -cos_omega*sin_sigma;
-//    eight_sphere.rot_matrix_cross1.a.y = -sin_omega*sin_sigma;
-//    eight_sphere.rot_matrix_cross1.a.z = -cos_sigma;
-//    eight_sphere.rot_matrix_cross1.b.x = -cos_omega*cos_sigma*sin_cross - sin_omega*cos_cross;
-//    eight_sphere.rot_matrix_cross1.b.y = -sin_omega*cos_sigma*sin_cross + cos_omega*cos_cross;
-//    eight_sphere.rot_matrix_cross1.b.z = sin_sigma*sin_cross;
-//    eight_sphere.rot_matrix_cross1.c.x = cos_omega*cos_sigma*cos_cross - sin_omega*sin_cross;
-//    eight_sphere.rot_matrix_cross1.c.y = sin_omega*cos_sigma*cos_cross + cos_omega*sin_cross;
-//    eight_sphere.rot_matrix_cross1.c.z = -sin_sigma*cos_cross;
-//
-//    eight_sphere.rot_matrix_cross2.a.x = -cos_omega*sin_sigma;
-//    eight_sphere.rot_matrix_cross2.a.y = -sin_omega*sin_sigma;
-//    eight_sphere.rot_matrix_cross2.a.z = -cos_sigma;
-//    eight_sphere.rot_matrix_cross2.b.x = cos_omega*cos_sigma*sin_cross - sin_omega*cos_cross;
-//    eight_sphere.rot_matrix_cross2.b.y = sin_omega*cos_sigma*sin_cross + cos_omega*cos_cross;
-//    eight_sphere.rot_matrix_cross2.b.z = -sin_sigma*sin_cross;
-//    eight_sphere.rot_matrix_cross2.c.x = cos_omega*cos_sigma*cos_cross + sin_omega*sin_cross;
-//    eight_sphere.rot_matrix_cross2.c.y = sin_omega*cos_sigma*cos_cross - cos_omega*sin_cross;
-//    eight_sphere.rot_matrix_cross2.c.z = -sin_sigma*cos_cross;
-//
-//    eight_sphere.segment = 1;
+//    // the four segments are labeled by integers 1,2,3,4 in dependence of orientation
+//    // for orientation of the figure-eight pattern: +1: segments are geodesic_1 -> circle_1 -> geodesic_2 -> circle_2
+//    //                                              -1: segments are geodesic_1 -> circle_2 -> geodesic_2 -> circle_1
+//    eight_in_S2.current_segment=1; // sets the start segment when eight_sphere is initialized
 //
 //}
+
+// initialization of an inclined figure-eight pattern on a sphere S^2, whose crossing point is located in the direction parameterized by azimuth w and inclination sigma
+// code: Thomas Gehrmann, slight modifications: Christoph Sieg
+void Plane::do_eight_sphere()
+{
+//    float LOCATION_SCALING_FACTOR_INV = 89.83204953368922;
+
+    // define the shape of eight
+    eight_sphere.cross_angle = radians(30);
+    eight_sphere.arc_length_angle = radians(30);
+
+    // orientation of eight
+    eight_sphere.omega = radians(00);//radians(g.omega_wind);
+    eight_sphere.omega_old = g.omega_wind;
+    eight_sphere.sigma = radians(30);//radians(g.sigma_wind);
+
+    intersection.sphere_radius_cm = 24000;
+
+    float cos_cross = cosf(eight_sphere.cross_angle);
+    float cos_arc = cosf(eight_sphere.arc_length_angle);
+    float sin_cross = sinf(eight_sphere.cross_angle);
+    float sin_arc = sinf(eight_sphere.arc_length_angle);
+
+    float cos_omega = cosf(eight_sphere.omega);
+    float cos_sigma = cosf(eight_sphere.sigma);
+    float sin_omega = sinf(eight_sphere.omega);
+    float sin_sigma = sinf(eight_sphere.sigma);
+
+    eight_sphere.eta = atanf(sin_arc/(cos_arc*cos_cross));
+    float sin_eta = sinf(eight_sphere.eta);
+    float cos_eta = cosf(eight_sphere.eta);
+
+ /*   eight_sphere.rot_8_matrix.a.x = cos_omega*cos_sigma;
+    eight_sphere.rot_8_matrix.a.y = -sin_omega*cos_sigma;
+    eight_sphere.rot_8_matrix.a.z = sin_sigma;
+    eight_sphere.rot_8_matrix.b.x = sin_omega;
+    eight_sphere.rot_8_matrix.b.y = cos_omega;
+    eight_sphere.rot_8_matrix.b.z = 0;
+    eight_sphere.rot_8_matrix.c.x = -cos_omega*sin_sigma;
+    eight_sphere.rot_8_matrix.c.y = sin_omega*sin_sigma;
+    eight_sphere.rot_8_matrix.c.z = cos_sigma;  */
+
+
+    intersection.distance_cm = intersection.sphere_radius_cm *(sin_eta*cos_cross*sin_arc + cos_eta*cos_arc);
+
+    intersection.circle_radius = sqrtf(intersection.sphere_radius_cm/100.0f * intersection.sphere_radius_cm/100.0f - intersection.distance_cm/100.0f * intersection.distance_cm/100.0f);
+
+    eight_sphere.secant = 2*intersection.sphere_radius_cm/100*sin_cross*sin_arc;
+    eight_sphere.sector_angle = acosf(eight_sphere.secant/(2*intersection.circle_radius));
+
+    eight_sphere.normal_vec.x = sin_omega*sin_eta - cos_omega*sin_sigma*cos_eta;        // product of rot_8_matrix times vector (0, -sin_eta, -cos_eta)^T
+    eight_sphere.normal_vec.y = -cos_omega*sin_eta - sin_omega*sin_sigma*cos_eta;       // normal_vec of left turning circle
+    eight_sphere.normal_vec.z = -cos_sigma*cos_eta;
+
+    eight_sphere.circle_center_left = home;
+    eight_sphere.circle_center_left.lat += intersection.distance_cm/100.0f * eight_sphere.normal_vec.x * LOCATION_SCALING_FACTOR_INV;
+    eight_sphere.circle_center_left.lng += intersection.distance_cm/100.0f * eight_sphere.normal_vec.y * LOCATION_SCALING_FACTOR_INV / longitude_scale(home);
+    eight_sphere.circle_center_left.alt -= intersection.distance_cm * eight_sphere.normal_vec.z;
+
+    eight_sphere.normal_vec.x = -sin_omega*sin_eta - cos_omega*sin_sigma*cos_eta;       // product of rot_8_matrix times vector (0, sin_eta, -cos_eta)^T
+    eight_sphere.normal_vec.y = cos_omega*sin_eta - sin_omega*sin_sigma*cos_eta;        // normal_vec of right turning circle
+    eight_sphere.normal_vec.z = -cos_sigma*cos_eta;
+
+    eight_sphere.circle_center_right = home;
+    eight_sphere.circle_center_right.lat += intersection.distance_cm/100.0f * eight_sphere.normal_vec.x * LOCATION_SCALING_FACTOR_INV;
+    eight_sphere.circle_center_right.lng += intersection.distance_cm/100.0f * eight_sphere.normal_vec.y * LOCATION_SCALING_FACTOR_INV / longitude_scale(home);
+    eight_sphere.circle_center_right.alt -= intersection.distance_cm * eight_sphere.normal_vec.z;
+
+    hal.console->print("right.lat: ");
+    hal.console->println( eight_sphere.circle_center_right.lat);
+    hal.console->print("right.lng: ");
+    hal.console->println( eight_sphere.circle_center_right.lng);
+    hal.console->print("left.lat: ");
+    hal.console->println( eight_sphere.circle_center_left.lat);
+    hal.console->print("left.lng: ");
+    hal.console->println( eight_sphere.circle_center_left.lng);
+
+    eight_sphere.rot_matrix_right.a.x = sin_omega*cos_eta - cos_omega*sin_sigma*sin_eta;
+    eight_sphere.rot_matrix_right.a.y = -cos_omega*cos_eta - sin_omega*sin_sigma*sin_eta;
+    eight_sphere.rot_matrix_right.a.z = -cos_sigma*sin_eta;
+    eight_sphere.rot_matrix_right.b.x = cos_omega*cos_sigma;
+    eight_sphere.rot_matrix_right.b.y = sin_omega*cos_sigma;
+    eight_sphere.rot_matrix_right.b.z = -sin_sigma;
+    eight_sphere.rot_matrix_right.c.x = sin_omega*sin_eta + cos_omega*sin_sigma*cos_eta;
+    eight_sphere.rot_matrix_right.c.y = -cos_omega*sin_eta + sin_omega*sin_sigma*cos_eta;
+    eight_sphere.rot_matrix_right.c.z = cos_sigma*cos_eta;
+
+    eight_sphere.rot_matrix_left.a.x = -sin_omega*cos_eta - cos_omega*sin_sigma*sin_eta;
+    eight_sphere.rot_matrix_left.a.y = cos_omega*cos_eta - sin_omega*sin_sigma*sin_eta;
+    eight_sphere.rot_matrix_left.a.z = -cos_sigma*sin_eta;
+    eight_sphere.rot_matrix_left.b.x = -cos_omega*cos_sigma;
+    eight_sphere.rot_matrix_left.b.y = -sin_omega*cos_sigma;
+    eight_sphere.rot_matrix_left.b.z = sin_sigma;
+    eight_sphere.rot_matrix_left.c.x = -sin_omega*sin_eta + cos_omega*sin_sigma*cos_eta;
+    eight_sphere.rot_matrix_left.c.y = cos_omega*sin_eta + sin_omega*sin_sigma*cos_eta;
+    eight_sphere.rot_matrix_left.c.z = cos_sigma*cos_eta;
+
+    eight_sphere.rot_matrix_cross1.a.x = -cos_omega*sin_sigma;
+    eight_sphere.rot_matrix_cross1.a.y = -sin_omega*sin_sigma;
+    eight_sphere.rot_matrix_cross1.a.z = -cos_sigma;
+    eight_sphere.rot_matrix_cross1.b.x = -cos_omega*cos_sigma*sin_cross - sin_omega*cos_cross;
+    eight_sphere.rot_matrix_cross1.b.y = -sin_omega*cos_sigma*sin_cross + cos_omega*cos_cross;
+    eight_sphere.rot_matrix_cross1.b.z = sin_sigma*sin_cross;
+    eight_sphere.rot_matrix_cross1.c.x = cos_omega*cos_sigma*cos_cross - sin_omega*sin_cross;
+    eight_sphere.rot_matrix_cross1.c.y = sin_omega*cos_sigma*cos_cross + cos_omega*sin_cross;
+    eight_sphere.rot_matrix_cross1.c.z = -sin_sigma*cos_cross;
+
+    eight_sphere.rot_matrix_cross2.a.x = -cos_omega*sin_sigma;
+    eight_sphere.rot_matrix_cross2.a.y = -sin_omega*sin_sigma;
+    eight_sphere.rot_matrix_cross2.a.z = -cos_sigma;
+    eight_sphere.rot_matrix_cross2.b.x = cos_omega*cos_sigma*sin_cross - sin_omega*cos_cross;
+    eight_sphere.rot_matrix_cross2.b.y = sin_omega*cos_sigma*sin_cross + cos_omega*cos_cross;
+    eight_sphere.rot_matrix_cross2.b.z = -sin_sigma*sin_cross;
+    eight_sphere.rot_matrix_cross2.c.x = cos_omega*cos_sigma*cos_cross + sin_omega*sin_cross;
+    eight_sphere.rot_matrix_cross2.c.y = sin_omega*cos_sigma*cos_cross - cos_omega*sin_cross;
+    eight_sphere.rot_matrix_cross2.c.z = -sin_sigma*cos_cross;
+
+    eight_sphere.segment = 1;
+
+}
 
 
 void Plane::do_change_speed(const AP_Mission::Mission_Command& cmd)
