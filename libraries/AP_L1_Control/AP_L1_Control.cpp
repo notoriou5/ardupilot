@@ -592,18 +592,21 @@ void AP_L1_Control::update_loiter_ellipse(const struct Location &center_loc, con
     // current location of the aircraft
 }
 
-void AP_L1_Control::update_loiter_3d(const struct Location &S2center, const Vector3f &ercv, int32_t S2radius, const float & theta_r, int8_t orientation, struct Location &desired_loc)
+
+void AP_L1_Control::update_loiter_3d(const struct Location &S2center, const Vector3f &ercv, int32_t S2radius, const float &theta_r, int8_t orientation, Vector3f &aircraft_posccenter, Vector3f &aircraft_vel, struct Location &desired_loc)
 {
-    // hal.console->print(S2center.alt);
-    // hal.console->print("erc: ");
-    // hal.console->print(ercv.x);
-    // hal.console->print(",");
-    // hal.console->print(ercv.y);
-    // hal.console->print(",");
-    // hal.console->println(ercv.z);
-    // hal.console->print(S2radius);
-    // hal.console->print(" ");
-    // hal.console->print(theta_r);
+//    hal.console->print(S2center.alt);
+//    hal.console->print("erc: ");
+//    hal.console->print(ercv.x);
+//    hal.console->print(", ");
+//    hal.console->print(ercv.y);
+//    hal.console->print(", ");
+//    hal.console->println(ercv.z);
+//    hal.console->print("S2radius: ");
+//    hal.console->print(S2radius);
+//    hal.console->print(" ");
+//    hal.console->print("theta_r: ");
+//    hal.console->println(theta_r);
 
 
     // current location of the aircraft
@@ -616,21 +619,28 @@ void AP_L1_Control::update_loiter_3d(const struct Location &S2center, const Vect
      // Calculate L1 gain required for specified damping (used during waypoint capture)
      const float K_L1 = 4.0f * _L1_damping * _L1_damping;
 
-     // distance between the center of the sphere and the center of the circle
      const float cos_thetar = cosf(radians(theta_r));
      const float sin_thetar = sinf(radians(theta_r));
+     // distance between the center of the sphere and the center of the circle
      const float D = S2radius * cos_thetar;
+     // radius of the circle
      const float S1radius = S2radius * sin_thetar;
+//     hal.console->print("D: ");
+//     hal.console->println(D);
+//     hal.console->print("S1radius: ");
+//     hal.console->println(S1radius);
+
      // const Vector3f S2ctoS1cv = ercv * D/100.0f;
+     // Location of the center of the circle
      struct Location S1center = S2center;
      location_offset(S1center, ercv.x * D/100.0f, ercv.y * D/100.0f);
      S1center.alt = S1center.alt - ercv.z * D;
-
-     // hal.console->print(S1center.lat);
-     // hal.console->print(" ");
-     // hal.console->print(S1center.lng);
-     // hal.console->print(" ");
-     // hal.console->print(S1center.alt);
+      hal.console->print("S1center.lat: ");
+      hal.console->println(S1center.lat);
+      hal.console->print("S1center.lng: ");
+      hal.console->println(S1center.lng);
+      hal.console->print("S1center.alt: ");
+      hal.console->println(S1center.alt);
 
     // get current position in NED coordinate system
     if (_ahrs.get_position(_current_loc) == false) {
@@ -640,6 +650,8 @@ void AP_L1_Control::update_loiter_3d(const struct Location &S2center, const Vect
     }
     // aircraft's position vector (direction of ideal (straight) tether) from the center of the circle
     Vector3f S1ctoav(location_3d_diff_NED(S1center, _current_loc));
+    // store aircraft position from the circle center for external use
+    aircraft_posccenter = S1ctoav;
     // lateral projection of the aircraft's position vector
     Vector2f S1ctoalv(S1ctoav.x, S1ctoav.y);
     // update _target_bearing_cd
@@ -658,6 +670,8 @@ void AP_L1_Control::update_loiter_3d(const struct Location &S2center, const Vect
               }; */
           velav.z = 0;
     }
+    // store aircraft velocity for external use
+    aircraft_vel = velav;
     // lateral projection of the aircraft's velocity vector
     Vector2f velalv(velav.x,velav.y);
     // lateral velocity; protect against becoming zero
@@ -839,6 +853,8 @@ void AP_L1_Control::update_loiter_3d(const struct Location &S2center, const Vect
          desired_loc = S1center;
          location_offset(desired_loc, env.x * S1radius / 100.0f, env.y * S1radius / 100.0f);
          desired_loc.alt = S1center.alt - env.z * S1radius;
+         hal.console->print("desired_loc.alt: ");
+         hal.console->println(desired_loc.alt);
      } else {
          // loiter
          _latAccDem = latAccDemCirc;
@@ -862,7 +878,7 @@ void AP_L1_Control::update_loiter_3d(const struct Location &S2center, const Vect
 
 
 
-//void AP_L1_Control::update_loiter_3d(const struct Location &anchor, const struct Location &center_WP, float radius, float psi, float theta, float w, float sigma, int32_t dist, int8_t loiter_direction, Matrix3f M_pe, int32_t segment, struct Location &desired_loc)
+// void AP_L1_Control::update_loiter_3d(const struct Location &anchor, const struct Location &center_WP, float radius, float psi, float theta, float w, float sigma, int32_t dist, int8_t loiter_direction, Matrix3f M_pe, int32_t segment, struct Location &desired_loc)
 //{
 //    struct Location _current_loc;
 //
@@ -1543,8 +1559,10 @@ void AP_L1_Control::update_loiter_3d(const struct Location &anchor, const struct
         //hal.console->println(segment);
         desired_loc = center_WP;
         location_offset(desired_loc, v_ellipse_ef.x, v_ellipse_ef.y);
-        //desired_loc.alt = dist * cos_sigma*cos_theta - 100.0f * v_ellipse_ef.z;
+        //desired_loc.alt = dist * cos_sigma * cos_theta - 100.0f * v_ellipse_ef.z;
         desired_loc.alt = center_WP.alt - 100.0f * v_ellipse_ef.z;
+        //hal.console->print("desired_loc.alt: ");
+        //hal.console->println(desired_loc.alt);
         _latAccDem = latAccDemCirc; //-9.81/_position_vec_ef.z*sqrtf(_position_vec_ef.length_squared()-_position_vec_ef.z*_position_vec_ef.z);
         _WPcircle = true;
         _bearing_error = 0.0f; // bearing error (radians), +ve to left of track
