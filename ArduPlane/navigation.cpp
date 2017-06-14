@@ -212,6 +212,39 @@ void Plane::update_loiter_ellipse()
     nav_controller->update_loiter_ellipse(home, ellipse.maxradius_cm, ellipse.minmaxratio, ellipse.azimuth_deg, ellipse.orientation);
 }
 
+void Plane::update_eight_plane()
+{
+
+    eight_in_R2.set_current_segment(eight_in_R2.aircraft_posR2center, eight_in_R2.aircraft_vel);
+//
+    hal.console->print("segment: ");
+    hal.console->println(eight_in_R2.current_segment);
+
+
+//
+//    //nav_controller->update_loiter_3d(eight_in_S2.S2_loc, eight_in_S2.segments_ercv[eight_in_S2.current_segment], eight_in_S2.S2_radius_cm, eight_in_S2.segments_theta_r[eight_in_S2.current_segment], eight_in_S2.segments_orientation[eight_in_S2.current_segment], eight_in_S2.aircraft_posccenter, eight_in_S2.aircraft_vel, eight_in_S2.desired_loc);
+    Vector3f current_ercv = eight_in_S2.current_ercv();
+    int32_t current_theta_r = eight_in_S2.current_theta_r();
+    int8_t current_orientation = eight_in_S2.current_orientation();
+
+    switch(eight_in_R2.current_segment){
+    case 0:
+        nav_controller->update_loiter_ellipse(eight_in_R2.center_loc, const int32_t maxradius_cm, const float minmaxratio, const float psi, const int8_t orientation)
+        update_eight_plane(eight_in_R2.center_loc, current_ercv, eight_in_S2.S2_radius_cm, current_theta_r, current_orientation, eight_in_S2.aircraft_posS2center, eight_in_S2.aircraft_vel, eight_in_S2.desired_loc);
+
+        break;
+    case 1:
+        break;
+    case 2:
+        break;
+    case 3:
+        break;
+    }
+
+}
+
+
+
 void Plane::update_loiter_3d()
 {
     // code: Christoph Sieg
@@ -268,34 +301,34 @@ void Plane::update_loiter_3d()
 // code: Christoph Sieg
 void Plane::update_eight_sphere() {
 
-    hal.console->print("aircraft_posS2center: ");
-    hal.console->print(eight_in_S2.aircraft_posS2center.x);
-    hal.console->print(", ");
-    hal.console->print(eight_in_S2.aircraft_posS2center.y);
-    hal.console->print(", ");
-    hal.console->println(eight_in_S2.aircraft_posS2center.z);
-
-    hal.console->print("rxaplanev: ");
-        hal.console->print(eight_in_S2.rxaplanev(eight_in_S2.aircraft_vel).x);
-        hal.console->print(", ");
-        hal.console->print(eight_in_S2.rxaplanev(eight_in_S2.aircraft_vel).y);
-        hal.console->print(", ");
-        hal.console->println(eight_in_S2.rxaplanev(eight_in_S2.aircraft_vel).z);
-
-    hal.console->print("aircraft_vel: ");
-    hal.console->print(eight_in_S2.aircraft_vel.x);
-    hal.console->print(", ");
-    hal.console->print(eight_in_S2.aircraft_vel.y);
-    hal.console->print(", ");
-    hal.console->println(eight_in_S2.aircraft_vel.z);
+//    hal.console->print("aircraft_posS2center: ");
+//    hal.console->print(eight_in_S2.aircraft_posS2center.x);
+//    hal.console->print(", ");
+//    hal.console->print(eight_in_S2.aircraft_posS2center.y);
+//    hal.console->print(", ");
+//    hal.console->println(eight_in_S2.aircraft_posS2center.z);
+//
+//    hal.console->print("rxaplanev: ");
+//        hal.console->print(eight_in_S2.rxaplanev(eight_in_S2.aircraft_vel).x);
+//        hal.console->print(", ");
+//        hal.console->print(eight_in_S2.rxaplanev(eight_in_S2.aircraft_vel).y);
+//        hal.console->print(", ");
+//        hal.console->println(eight_in_S2.rxaplanev(eight_in_S2.aircraft_vel).z);
+//
+//    hal.console->print("aircraft_vel: ");
+//    hal.console->print(eight_in_S2.aircraft_vel.x);
+//    hal.console->print(", ");
+//    hal.console->print(eight_in_S2.aircraft_vel.y);
+//    hal.console->print(", ");
+//    hal.console->println(eight_in_S2.aircraft_vel.z);
 
     hal.console->print("signs: ");
     hal.console->print(eight_in_S2.rxaplanev(eight_in_S2.aircraft_posS2center) * eight_in_S2.epsixv);
     hal.console->print(", ");
-    hal.console->print(eight_in_S2.rxaplanev(eight_in_S2.aircraft_posS2center) * eight_in_S2.ethetaxv);
+    hal.console->println(eight_in_S2.rxaplanev(eight_in_S2.aircraft_posS2center) * eight_in_S2.ethetaxv);
 
-    hal.console->print("sufficient_dist_to_crossing_point: ");
-    hal.console->println(eight_in_S2.sufficient_dist_to_crossing_point);
+    hal.console->print("in_vicinity_of_crossing_point: ");
+    hal.console->println(eight_in_S2.in_vicinity_of_crossing_point);
 
     hal.console->print("in_right_direction: ");
     hal.console->println(eight_in_S2.in_right_direction);

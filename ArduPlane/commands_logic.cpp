@@ -875,7 +875,7 @@ void Plane::do_loiter_ellipse()
 {
     ellipse.center_loc = home;
     ellipse.maxradius_cm = 15588.5;
-    ellipse.minmaxratio = cosf(radians(60));
+    ellipse.minmaxratio = cosf(radians(90));
     ellipse.azimuth_deg = 0; // azimuth of the larger principal axis from the north direction
     ellipse.orientation = -1;
     ellipse.height_cm = 9000;
@@ -884,15 +884,92 @@ void Plane::do_loiter_ellipse()
     next_WP_loc = ellipse.center_loc;
 }
 
+
+void Plane::do_eight_plane()
+{
+    eight_in_R2.center_loc = home; // location of the center point on the ground
+    eight_in_R2.d_c_cm = 5000; // horizontal distance from crossing point to turning point
+    eight_in_R2.S1_radius_cm = 5000; // radius of the turning circles
+    eight_in_R2.height_cm = 5000; // height of the pattern above the center point
+    eight_in_R2.azimuth_deg = 0.0f;
+    eight_in_R2.orientation = 1;     // orientation of the figure-eight pattern
+
+    // the four segments are labeled by integers 0,1,2,3 in dependence of orientation
+    // for orientation of the figure-eight pattern: +1: segment sequence is: geodesic_1 -> circle_1 -> geodesic_2 -> circle_2
+    //                                              -1: segment sequence is: geodesic_1 -> circle_2 -> geodesic_2 -> circle_1
+    eight_in_R2.current_segment = 0; // sets the start segment when eight_sphere is initialized
+                                     // and the entry segment if no segment switching occurs because the aircraft is located in the vicinity of the crossing point defined by _mindistxaplane
+
+  // derived parameters
+  // trigonometric functions of all angles
+  // trigonometric functions of the angles determining the attitude (azimuthal position in the sky) of the figure-eight pattern
+  eight_in_R2.cos_psi = cosf(radians(eight_in_R2.azimuth_deg));
+  eight_in_R2.sin_psi = sinf(radians(eight_in_R2.azimuth_deg));
+  // trigonometric functions of half of the crossing angle
+  eight_in_R2.cos_chihalf = eight_in_R2.S1_radius_cm / eight_in_R2.d_c_cm;
+  eight_in_R2.sin_chihalf = sqrt(1 - sq(eight_in_R2.cos_chihalf));
+
+  // crossing point of the figure-eight pattern: coordinate frame, rotation matrix, position vector
+  // unit vector pointing from S2_loc to the crossing point of the figure-eight pattern
+  eight_in_R2.erxv = Vector3f(0, 0, -1);
+  // unit vector of the tangential plane at the crossing point in polar direction
+  eight_in_R2.ethetaxv = Vector3f(eight_in_R2.cos_psi, eight_in_R2.sin_psi, 0);
+  // unit vector of the tangential plane at the crossing point in azimuthal direction
+  eight_in_R2.epsixv; // = Vector3f(-sin_psi, cos_psi, 0);
+  // rotation matrix that yields the vectors of the figure_eight pattern with crossing point in the direction erxv
+  // from those of the figure-eight pattern with crossing point at erv; // = (0,0,-1) and turning circle centers aligned with the east axis
+  eight_in_R2.Rm = Matrix3f(eight_in_R2.ethetaxv, eight_in_R2.epsixv, -eight_in_R2.erxv);
+  // vector pointing from S2_loc to the crossing point
+  eight_in_R2.rxv = eight_in_R2.erxv * eight_in_R2.height_cm / 100.0f;
+
+  // figure-eight pattern from four circle segments defined via four planes in canonical orientation
+  // canonical orientation (at azimuth_deg = 0, elevation_deg = 90 in the NED coordinate system): crossing point is upwards (in the (0,0,-1)-direction) from S2_loc; turning circle centers are aligned along east axis
+  // figure-8-pattern is given by the sequences:
+  // for orientation = +1: geodesic_1 -> circle_1 -> geodesic_2 -> circle_2
+  //                   -1: geodesic_1 -> circle_2 -> geodesic_2 -> circle_1
+  // individual circle segment orientation = +1 corresponds to applying the right-hand rule to minus the normal vectors pointing to the center of the circle segment
+  // vector of the first turning circle center
+  // orientation of c1 = orientation
+  eight_in_R2.rc1v = (eight_in_R2.Rm * Vector3f(0.0f, eight_in_R2.d_c_cm, -eight_in_R2.height_cm));
+  // vector of the second turning circle center
+  // orientation of c2 = - orientation
+  eight_in_R2.rc2v = (eight_in_R2.Rm * Vector3f(0.0f, -eight_in_R2.d_c_cm, -eight_in_R2.height_cm));
+
+  // vectors from the center of the plane to the transition points
+  // NE
+  eight_in_R2.rt1 = (eight_in_R2.Rm * (Vector3f(0.0f, eight_in_R2.d_c_cm, -eight_in_R2.height_cm) + Vector3f(eight_in_R2.S1_radius_cm * eight_in_R2.cos_chihalf, -eight_in_R2.S1_radius_cm * eight_in_R2.sin_chihalf, 0.0f)));
+  // SE
+  eight_in_R2.rt2 = (eight_in_R2.Rm * (Vector3f(0.0f, eight_in_R2.d_c_cm, -eight_in_R2.height_cm) + Vector3f(-eight_in_R2.S1_radius_cm * eight_in_R2.cos_chihalf, -eight_in_R2.S1_radius_cm * eight_in_R2.sin_chihalf, 0.0f)));
+  // SW
+  eight_in_R2.rt3 = (eight_in_R2.Rm * (Vector3f(0.0f, -eight_in_R2.d_c_cm, -eight_in_R2.height_cm) + Vector3f(-eight_in_R2.S1_radius_cm * eight_in_R2.cos_chihalf, eight_in_R2.S1_radius_cm * eight_in_R2.sin_chihalf, 0.0f)));
+  // NW
+  eight_in_R2.rt4 = (eight_in_R2.Rm * (Vector3f(0.0f, -eight_in_R2.d_c_cm, -eight_in_R2.height_cm) + Vector3f(eight_in_R2.S1_radius_cm * eight_in_R2.cos_chihalf, eight_in_R2.S1_radius_cm * eight_in_R2.sin_chihalf, 0.0f)));
+
+  // unit tangent vectors of the two geodesic segments
+  eight_in_R2.etg1v = eight_in_R2.Rm * Vector3f(eight_in_R2.sin_chihalf, eight_in_R2.cos_chihalf, 0.0f) * eight_in_R2.orientation;
+  eight_in_R2.etg2v = eight_in_R2.Rm * Vector3f(eight_in_R2.sin_chihalf, -eight_in_R2.cos_chihalf, 0.0f) * eight_in_R2.orientation;
+
+  // tangent vectors at the transgression points between the segments in the directions demanded by orientation
+  // in NE quadrant:
+  eight_in_R2.etg1c1v = eight_in_R2.etg1v;
+  // in SE quadrant:
+  eight_in_R2.etc1g2v = eight_in_R2.etg2v;
+  // in NW quadrant
+  eight_in_R2.etg2c2v = eight_in_R2.etg2v;
+  // in SW quadrant
+  eight_in_R2.etc2g1v = eight_in_R2.etg1v;
+
+}
+
 // code: Christoph Sieg:
 void Plane::do_loiter_3d()
 {
     S1_in_S2.S2_loc = home;
-    S1_in_S2.S2_radius_cm = 18000;
-    S1_in_S2.theta_rho_deg = 60.0f;
+    S1_in_S2.S2_radius_cm = 12000;
+    S1_in_S2.theta_rho_deg = 45.0f;
     S1_in_S2.S1_radius_cm = S1_in_S2.S2_radius_cm * sinf(radians(S1_in_S2.theta_rho_deg));
     S1_in_S2.azimuth_deg = 0.0f;
-    S1_in_S2.elevation_deg = 60.0f;
+    S1_in_S2.elevation_deg = 90.0f;
     S1_in_S2.orientation = 1;
 
     float theta = 90.0f - S1_in_S2.elevation_deg;
@@ -1047,7 +1124,7 @@ void Plane::do_eight_sphere()
     eight_in_S2.theta_c_deg = 30.0f; // half of the angle between the centers of the two turning circle segments, range: [0,90] degrees
     eight_in_S2.theta_r_deg = 20.705f; // opening angle of the cone with tip at S2_loc and base given by the turning circle, range: [0,90-theta_c_deg] degrees in order to guarantee that the sweeping angle between the two apices is less than 180 deg.
     eight_in_S2.azimuth_deg = 0.0f; // azimuth angle of the vector pointing from S2_loc to the crossing point of the figure-eight pattern, range: [0,360]
-    eight_in_S2.elevation_deg = 90.0f; // inclination angle of the vector pointing from S2_loc to the crossing point of the figure-eight pattern, range [0,90]
+    eight_in_S2.elevation_deg = 45.0f; // inclination angle of the vector pointing from S2_loc to the crossing point of the figure-eight pattern, range [0,90]
     eight_in_S2.orientation = 1; // orientation of the figure-eight pattern: +1: downwards flight on geodesic, upwards flight on turning circle segments
                                  //                                          -1: upwards flight on geodesic, downwards flight on turning circle segments
 
@@ -1055,12 +1132,13 @@ void Plane::do_eight_sphere()
     // for orientation of the figure-eight pattern: +1: segment sequence is: geodesic_1 -> circle_1 -> geodesic_2 -> circle_2
     //                                              -1: segment sequence is: geodesic_1 -> circle_2 -> geodesic_2 -> circle_1
     eight_in_S2.current_segment = 0; // sets the start segment when eight_sphere is initialized
-                            // and the entry segment if no segment switching occurs because the aircraft is located in the vicinity of the crossing point defined by _mindistxaplane
+                                     // and the entry segment if no segment switching occurs because the aircraft is located in the vicinity of the crossing point defined by _mindistxaplane
+
 
     // derived parameters
     // trigonometric functions of all angles
     // calculation of polar angle from elevation
-    eight_in_S2.theta = 90 - eight_in_S2.elevation_deg;
+    eight_in_S2.theta = 90.0f - eight_in_S2.elevation_deg;
     // trigonometric functions of the angles determining the attitude (azimuthal and polar position in the sky) of the figure-eight pattern
     eight_in_S2.cos_psi = cosf(radians(eight_in_S2.azimuth_deg));
     eight_in_S2.sin_psi = sinf(radians(eight_in_S2.azimuth_deg));
@@ -1129,6 +1207,10 @@ void Plane::do_eight_sphere()
     eight_in_S2.etg2c2v = eight_in_S2.Rm * Vector3f(eight_in_S2.cos_theta_0 * eight_in_S2.sin_chihalf, -eight_in_S2.cos_theta_0 * eight_in_S2.cos_chihalf, eight_in_S2.sin_theta_0) * eight_in_S2.orientation;
     // in SW quadrant
     eight_in_S2.etc2g1v = eight_in_S2.Rm * Vector3f(eight_in_S2.cos_theta_0 * eight_in_S2.sin_chihalf, eight_in_S2.cos_theta_0 * eight_in_S2.cos_chihalf, -eight_in_S2.sin_theta_0) * eight_in_S2.orientation;
+
+    // tangent vectors at the crossing point
+    eight_in_S2.etg1xv  = eight_in_S2.Rm * Vector3f(eight_in_S2.sin_chihalf, eight_in_S2.cos_chihalf, 0.0f) * eight_in_S2.orientation;
+    eight_in_S2.etg2xv = eight_in_S2.Rm * Vector3f(eight_in_S2.sin_chihalf, -eight_in_S2.cos_chihalf, 0.0f) * eight_in_S2.orientation;
 
 }
 
