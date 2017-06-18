@@ -66,8 +66,9 @@ enum FlightMode {
     QLAND         = 20,
     QRTL          = 21,
     LOITER_ELLIPSE = 36,
-    LOITER_3D = 37,
-    EIGHT_SPHERE = 38
+    EIGHT_PLANE = 37,
+    LOITER_3D = 38,
+    EIGHT_SPHERE = 39
 };
 
 enum mode_reason_t {

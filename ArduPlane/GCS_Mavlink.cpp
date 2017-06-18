@@ -48,6 +48,7 @@ void Plane::send_heartbeat(mavlink_channel_t chan)
     case RTL:
     case LOITER:
     case LOITER_ELLIPSE:
+    case EIGHT_PLANE:
     case LOITER_3D:
     case EIGHT_SPHERE:
     case AVOID_ADSB:
@@ -1105,6 +1106,11 @@ void GCS_MAVLINK_Plane::handleMessage(mavlink_message_t* msg)
 
         case MAV_CMD_NAV_LOITER_ELLIPSE:
             plane.set_mode(LOITER_ELLIPSE, MODE_REASON_GCS_COMMAND);
+            result = MAV_RESULT_ACCEPTED;
+            break;
+
+        case MAV_CMD_NAV_EIGHT_PLANE:
+            plane.set_mode(EIGHT_PLANE, MODE_REASON_GCS_COMMAND);
             result = MAV_RESULT_ACCEPTED;
             break;
 

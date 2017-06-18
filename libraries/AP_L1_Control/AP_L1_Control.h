@@ -45,7 +45,7 @@ public:
     float turn_distance(float wp_radius, float turn_angle) const;
     void update_waypoint(const struct Location &prev_WP, const struct Location &next_WP);
     void update_loiter(const struct Location &center_WP, float radius, int8_t loiter_direction);
-    void update_loiter_ellipse(const struct Location &center, const int32_t maxradius_cm, const float minmaxratio, const float psi, const int8_t orientation);
+    void update_loiter_ellipse(const struct Location &center, const int32_t maxradius_cm, const float minmaxratio, const float psi, const int8_t orientation, struct Location &aircraft_loc, Vector3f &aircraft_vel, struct Location &desired_loc);
     void update_loiter_3d(const struct Location &S2center, const Vector3f &ercv, int32_t S2radius, const float & theta_r, int8_t orientation, Vector3f &aircraft_posccenter, Vector3f &aircraft_vel, struct Location &desired_loc);
     //void update_loiter_3d(const struct Location &S2center, const struct Location &S1center, int32_t S1radius, int32_t D, int8_t orientation, struct Location &desired_loc);
     void update_loiter_3d(const struct Location &anchor, const struct Location &center_WP, float radius, float psi, float theta, float w, float sigma, int32_t dist, int8_t loiter_direction, Matrix3f M_pe, int32_t segment, struct Location &desired_loc);

@@ -482,6 +482,12 @@ void Plane::set_mode(enum FlightMode mode, mode_reason_t reason)
         do_loiter_ellipse();
         break;
 
+    case EIGHT_PLANE:
+        auto_throttle_mode = true;
+        auto_navigation_mode = true;
+        do_eight_plane();
+        break;
+
     case LOITER_3D:
         auto_throttle_mode = true;
         auto_navigation_mode = true;
@@ -559,6 +565,7 @@ bool Plane::mavlink_set_mode(uint8_t mode)
     case RTL:
     case LOITER:
     case LOITER_ELLIPSE:
+    case EIGHT_PLANE:
     case LOITER_3D:
     case EIGHT_SPHERE:
     case QSTABILIZE:
@@ -753,6 +760,9 @@ void Plane::print_flight_mode(AP_HAL::BetterStream *port, uint8_t mode)
     case LOITER_ELLIPSE:
         port->printf("Loiter_ellipse");
         break;
+    case EIGHT_PLANE:
+        port->printf("8_plane");
+        break;
     case LOITER_3D:
         port->printf("Loiter_3d");
         break;
@@ -831,6 +841,9 @@ void Plane::notify_flight_mode(enum FlightMode mode)
         break;
     case LOITER_ELLIPSE:
         notify.set_flight_mode_str("LELL");
+        break;
+    case EIGHT_PLANE:
+        notify.set_flight_mode_str("8R2");
         break;
     case LOITER_3D:
         notify.set_flight_mode_str("L3D");

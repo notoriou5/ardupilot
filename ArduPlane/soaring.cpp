@@ -31,7 +31,9 @@ void Plane::update_soaring() {
     case LOITER_ELLIPSE:
         // Do nothing. We will switch back to auto/rtl before enabling throttle.
         break;
-    case LOITER_3D:
+    case EIGHT_PLANE:
+        // Do nothing. We will switch back to auto/rtl before enabling throttle.
+     case LOITER_3D:
         // Do nothing. We will switch back to auto/rtl before enabling throttle.
         break;
     case EIGHT_SPHERE:

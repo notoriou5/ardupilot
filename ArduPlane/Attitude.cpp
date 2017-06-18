@@ -597,6 +597,7 @@ bool Plane::allow_reverse_thrust(void)
                      nav_cmd == MAV_CMD_NAV_LOITER_TURNS ||
                      nav_cmd == MAV_CMD_NAV_LOITER_UNLIM ||
                      nav_cmd == MAV_CMD_NAV_LOITER_ELLIPSE ||
+                     nav_cmd == MAV_CMD_NAV_EIGHT_PLANE ||
                      nav_cmd == MAV_CMD_NAV_LOITER_3D ||
                      nav_cmd == MAV_CMD_NAV_EIGHT_SPHERE
                      );
@@ -610,6 +611,7 @@ bool Plane::allow_reverse_thrust(void)
 
     case LOITER:
     case LOITER_ELLIPSE: // have to finish it
+    case EIGHT_PLANE: // have to finish it
     case LOITER_3D: // have to finish it
     case EIGHT_SPHERE: // have to finish it
         allow |= (g.use_reverse_thrust & USE_REVERSE_THRUST_LOITER);
