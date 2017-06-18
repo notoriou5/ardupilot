@@ -805,7 +805,7 @@ private:
           return _rxav;
       }
 
-
+      // quadrants are labeled by integers: NE:0, SE:1, SW:2, NW:3 for the figure-eight pattern with crossing point in the direction (0,0,-1) and east-west attitude;
       // returns the index of the quadrant in which the aircraft is located
       int8_t quadrant(const Vector3f rav) {
           Vector3f _rxaplanev = rxaplanev(rav);
@@ -820,41 +820,30 @@ private:
 
       bool entered_new_quadrant;
       bool close_to_crossing_point;
-      bool in_right_direction;
-      bool switch_to_next_segment;
+      bool moving_matches_orientation;
+      bool passed_transgression_point;
 
 
 // set the current segment in dependence of the position relative to the center of the sphere and velocity vector of the aircraft
       void set_current_segment(const struct Location aloc, const Vector3f vav) {
           Vector3f rav = location_3d_diff_NED(center_loc, aloc);
-          //rav.x = -rav.x;
-          //rav.y = -rav.y;
-          // position vector from the center of the S2 to the aircraft projected onto the tangential plane
+          // position vector from the center of the S2 to the aircraft projected onto the tangential plane at the crossing point
           Vector3f _rxaplanev = rxaplanev(rav);
       // minimum distance of aircraft from crossing point in the plane at which consecutive segment switching is allowed
          float _mindistxaplane = 0.25f * d_c_cm / 100.0f; // set to half of length of each of the four geodesic arms projected onto the tangential plane at the crossing point
-
-      // bool variable
-      close_to_crossing_point = bool(_rxaplanev.length() <= _mindistxaplane);
-      // projections of the aircraft's velocity vector onto the tangential vectors of the geodesic segments a the crossing point
-      float vag1 = vav * etg1v;
-      float vag2 = vav * etg2v;
-      // quadrants are labeled by integers: NE:0, SE:1, SW:2, NW:3 for the figure-eight pattern with crossing point in the direction (0,0,-1) and east-west attitude;
-      // turning circle centers for each quadrant
-      // Vector3f quadrants_cv[4] = {rc1v, rc1v, rc2v, rc2v};
-      //quadrants_cv[4] = {Vector3f(0, 0, 0), Vector3f(0, 0, 0),Vector3f(0, 0, 0),Vector3f(0, 0, 0)};
-      // unit tangent vectors at the transgression point of each quadrant
-      // Vector3f segments_tv[4] = {etg1c1v, etc1g2v, etg2c2v, etc2g1v};
-      //segments_tv[4] = {Vector3f(-0.707, 0.707, 0), Vector3f(-0.707, -0.707, 0), Vector3f(0.707, -0.707, 0), Vector3f(0.707, 0.707, 0)};
-      // set current quadrant in dependence of the location of the aircraft
+         //
+         close_to_crossing_point = bool(_rxaplanev.length() <= _mindistxaplane);
+      // set internal variable _current segment
+      int8_t _current_segment = current_segment;
+      // set internal variable _current quadrant in dependence of the location of the aircraft
       int8_t _current_quadrant = quadrant(rav);
       entered_new_quadrant = bool(_current_quadrant != current_quadrant);
-      int8_t _current_segment = current_segment;
 
       if(close_to_crossing_point){
-        // the aircraft is in the vicinity of the crossing point; no consecutive switching of segments
-        // select the geodesic segment with tangent vector maximal which has the maximal projection onto the aircraft's velocity vector
-        if(vag1 > vag2){
+        // the aircraft is in the vicinity of the crossing point; no consecutive switching of segments s allowed
+        // select the geodesic segment along which the aircraft can fly in accord with the segment's orientation by minimal course corrections
+        // vector etg1v - etg2v poin
+        if(vav * (etg1v -etg2v) >= 0){
           // select segment corresponding to g1
           _current_segment = 0;
         } else {
@@ -862,43 +851,14 @@ private:
           _current_segment = 2;
         }
       } else {
-//        // the aircraft is not in the vicinity of the crossing point; consecutive switching of segments required at the transgression points
-//        // quadrants are labeled by integers: NE:0, SE:1, SW:2, NW:3 for the figure-eight pattern with crossing point in the direction (0,0,-1) and east-west attitude;
-//        // turning circle centers for each quadrant
-//        Vector3f quadrants_cv[4] = {rc1v, rc1v, rc2v, rc2v};
-//        //quadrants_cv[4] = {Vector3f(0, 0, 0), Vector3f(0, 0, 0),Vector3f(0, 0, 0),Vector3f(0, 0, 0)};
-//        // unit tangent vectors at the transgression point of each quadrant
-//        Vector3f segments_tv[4] = {etg1c1v, etc1g2v, etg2c2v, etc2g1v};
-//        //segments_tv[4] = {Vector3f(-0.707, 0.707, 0), Vector3f(-0.707, -0.707, 0), Vector3f(0.707, -0.707, 0), Vector3f(0.707, 0.707, 0)};
-//        // set current quadrant in dependence of the location of the aircraft
-//        int8_t _current_quadrant = quadrant(rav);
-//        // selecting the center vector of the turning circle for the current quadrant
-//        Vector3f _current_cv = quadrants_cv[_current_quadrant];
-//        // selecting the tangent vector at the endpoint of the current segment
-//        Vector3f _current_tv = segments_tv[_current_segment];
-//        current_tv = _current_tv;
-//        // position vector from center of the current turning circle to the aircraft
-//        Vector3f _rcav = rav - _current_cv;
-//        if (_rcav * _current_tv >= 0){
-//          // if _rcav * _current_tv >= 0, the switching to the next segment as determined by the orientation of the figure_eight pattern has to occur
-//          // if vav * _current_tv >= 0: the aircraft moves along the figure_eight pattern as prescribed by orientation
-//          //                       < 0: the aircraft moves along the figure_eight pattern in the opposite direction against the prescribed by orientation
-//          // => temporally next segment is segment = segment + sign(vav * _current_tv)
-//          in_right_direction = 1;//bool(vav * _current_tv >= 0);
-//          switch_to_next_segment = bool(_rcav * _current_tv >= 0);
-//          int8_t step;
-//          if(in_right_direction){step = 1;} else {step = -1;}
-//          _current_segment = _current_segment + step;
-//          current_segment = _current_segment % 4;
-
-
-          // quadrants are labeled by integers: g1:0, c1:1, g2:2, c2:3 for the figure-eight pattern
-          // center vectors of each segment
+          // segments are labeled by integers: g1:0, c1:1, g2:2, c2:3 for the figure-eight pattern
+          // array of center vectors of the segments
           Vector3f segments_cv[4] = {rc1v, rc1v, rc2v, rc2v};
-          // unit tangent vectors at the transgression point of each segment
+          // array of unit tangent vectors at the transgression points of the segments
           Vector3f segments_tv[4] = {etg1c1v, etc1g2v, etg2c2v, etc2g1v};
           // set current quadrant in dependence of the location of the aircraft
           _current_segment = current_segment;
+          // select the center of the turning circle that is used to determine switching from the current to the subsequent segment
           Vector3f _current_cv = segments_cv[_current_segment];
           // selecting the tangent vector at the endpoint of the current segment
           Vector3f _current_tv = segments_tv[_current_segment];
@@ -906,19 +866,20 @@ private:
           current_tv = _current_tv;
           // position vector from center of the current turning circle to the aircraft
           Vector3f _rcav = rav - _current_cv;
-          if (entered_new_quadrant && _rcav * _current_tv >= 0){
-              // if _rcav * _current_tv >= 0, the switching to the next segment as determined by the orientation of the figure_eight pattern has to occur
+          passed_transgression_point = bool(_rcav * _current_tv >= 0);
+          // if since last segment switching the aircraft has entered a new quadrant and has passed the transgression point in that quadrant, segment switching has to occur
+          if (entered_new_quadrant && passed_transgression_point){
               // if vav * _current_tv >= 0: the aircraft moves along the figure_eight pattern as prescribed by orientation
               //                       < 0: the aircraft moves along the figure_eight pattern in the opposite direction against the prescribed by orientation
               // => temporally next segment is segment = segment + sign(vav * _current_tv)
-              in_right_direction = 1;//bool(vav * _current_tv >= 0);
-              switch_to_next_segment = bool(_rcav * _current_tv >= 0);
+              moving_matches_orientation = 1;//bool(vav * _current_tv >= 0);
               int8_t step;
-              if(in_right_direction){step = 1;} else {step = -1;}
+              if(moving_matches_orientation){step = 1;} else {step = -1;}
               _current_segment = _current_segment + step;
-              current_segment = _current_segment % 4;
+              _current_segment = _current_segment % 4;
+              current_segment = _current_segment;
               current_quadrant = _current_quadrant;
-        }
+          }
       }
       }
 
@@ -939,7 +900,7 @@ private:
         int8_t orientation;
         // variables to store the current and desired location and velocity
         //        int32_t height_cm;
-        Vector3f aircraft_posS2center;
+        struct Location aircraft_loc;
         Vector3f aircraft_vel;
         struct Location desired_loc;
     } S1_in_S2;
@@ -964,15 +925,19 @@ private:
 
 
         // variables to store the current and desired location and velocity
-        Vector3f aircraft_posS2center;
+        struct Location aircraft_loc;
         Vector3f aircraft_vel;
         struct Location desired_loc;
 
       // the four segments are labeled by integers 0,1,2,3 in dependence of orientation
       // for orientation of the figure-eight pattern: +1: segment sequence is: geodesic_1 -> circle_1 -> geodesic_2 -> circle_2
       //                                              -1: segment sequence is: geodesic_1 -> circle_2 -> geodesic_2 -> circle_1
-      int8_t current_segment; // sets the start segment when eight_sphere is initialized
-                              // and the entry segment if no segment switching occurs because the aircraft is located in the vicinity of the crossing point defined by _mindistxaplane
+      // set current quadrant to a value that is not 0,1,2,3 such that it is altered in the initialization
+         int8_t current_quadrant; // = 4
+         int8_t current_segment; // sets the start segment when eight_sphere is initialized
+                                // and the entry segment if no segment switching occurs because the aircraft is located in the vicinity of the crossing point defined by _mindistxaplane
+        Vector3f current_cv;
+        Vector3f current_tv;
 
       // derived parameters
       // trigonometric functions of all angles
@@ -1122,75 +1087,143 @@ private:
       }
 
 
+      // quadrants are labeled by integers: NE:0, SE:1, SW:2, NW:3 for the figure-eight pattern with crossing point in the direction (0,0,-1) and east-west attitude;
       // returns the index of the quadrant in which the aircraft is located
       int8_t quadrant(const Vector3f rav) {
           Vector3f _rxaplanev = rxaplanev(rav);
           int8_t _current_quadrant;
           // north or south
-          if (_rxaplanev * epsixv >= 0) {_current_quadrant = -2;} else {_current_quadrant = -1;}
+          if (_rxaplanev * ethetaxv >= 0) {_current_quadrant = -2;} else {_current_quadrant = -1;}
           // east or west
-          if (_rxaplanev * ethetaxv >= 0) {_current_quadrant = _current_quadrant + 2;} else {_current_quadrant = -_current_quadrant + 1;};
+          if (_rxaplanev * epsixv >= 0) {_current_quadrant = _current_quadrant + 2;} else {_current_quadrant = -_current_quadrant + 1;};
           // current_quadrant is set to integer 0,1,2,3, where: NE:0, SE:1, SW:2, NW:3
           return _current_quadrant;
        }
 
-      bool in_vicinity_of_crossing_point;
-      bool in_right_direction;
-      bool switch_to_next_segment;
+
+      bool entered_new_quadrant;
+      bool close_to_crossing_point;
+      bool moving_matches_orientation;
+      bool passed_transgression_point;
 
 
-// set the current segment in dependence of the position relative to the center of the sphere and velocity vector of the aircraft
-      void set_current_segment(const Vector3f rav, const Vector3f vav) {
-          // position vector from the center of the S2 to the aircraft projected onto the tangential plane
-          Vector3f _rxaplanev = rxaplanev(rav);
-      // minimum distance of aircraft from crossing point in the plane at which consecutive segment switching is allowed
-         float _mindistxaplane = 0.5f * S2_radius_cm * sin_theta_0; // set to half of length of each of the four geodesic arms projected onto the tangential plane at the crossing point
+      // set the current segment in dependence of the position relative to the center of the sphere and velocity vector of the aircraft
+            void set_current_segment(const struct Location aloc, const Vector3f vav) {
+                Vector3f rav = location_3d_diff_NED(S2_loc, aloc);
+                // position vector from the center of the S2 to the aircraft projected onto the tangential plane at the crossing point
+                Vector3f _rxaplanev = rxaplanev(rav);
+            // minimum distance of aircraft from crossing point in the plane at which consecutive segment switching is allowed
+               float _mindistxaplane = 0.25f * S2_radius_cm/ 100.0f * sin_theta_0; // set to half of length of each of the four geodesic arms projected onto the tangential plane at the crossing point
+               //
+               close_to_crossing_point = bool(_rxaplanev.length() <= _mindistxaplane);
+            // set internal variable _current segment
+            int8_t _current_segment = current_segment;
+            // set internal variable _current quadrant in dependence of the location of the aircraft
+            int8_t _current_quadrant = quadrant(rav);
+            entered_new_quadrant = bool(_current_quadrant != current_quadrant);
 
-      // bool variable
-      in_vicinity_of_crossing_point = bool(_rxaplanev.length() < _mindistxaplane);
-      // projections of the aircraft's velocity vector onto the tangential vectors of the geodesic segments a the crossing point
-      float vag1 = vav * etg1xv;
-      float vag2 = vav * etg2xv;
-      int8_t _current_segment = current_segment;
-      if(in_vicinity_of_crossing_point){
-        // the aircraft is in the vicinity of the crossing point; no consecutive switching of segments
-        // select the geodesic segment with tangent vector maximal which has the maximal projection onto the aircraft's velocity vector
-        if(vag1 > vag2){
-          // select segment corresponding to g1
-          _current_segment = 0;
-        } else {
-          // select segment corresponding to g2
-          _current_segment = 2;
-        }
-      } else {
-        // the aircraft is not in the vicinity of the crossing point; consecutive switching of segments required at the transgression points
-        // quadrants are labeled by integers: NE:0, SE:1, SW:2, NW:3 for the figure-eight pattern with crossing point in the direction (0,0,-1) and east-west attitude;
-        // turning circle centers for each quadrant
-        Vector3f quadrants_cv[4] = {erc1v * dist_cm, erc1v * dist_cm, erc2v * dist_cm, erc2v * dist_cm};
-        // unit tangent vectors at the transgression point of each quadrant
-        Vector3f quadrants_tv[4] = {etg1c1v, etc1g2v, etg2c2v, etc2g1v};
-        // set current quadrant in dependence of the location of the aircraft
-        int8_t _current_quadrant = quadrant(rav);
-        // selecting the center vector of the turning circle and tangent vector at transgression point for the current quadrant
-        Vector3f _current_cv = quadrants_cv[_current_quadrant];
-        Vector3f _current_tv = quadrants_tv[_current_quadrant];
-        // position vector from center of the current turning circle to the aircraft
-        Vector3f _rcav = rav - _current_cv;
-        if (_rcav * _current_tv >= 0){
-          // if _rcav * _current_tv >= 0, the switching to the next segment as determined by the orientation of the figure_eight pattern has to occur
-          // if vav * _current_tv >= 0: the aircraft moves along the figure_eight pattern as prescribed by orientation
-          //                       < 0: the aircraft moves along the figure_eight pattern in the opposite direction against the prescribed by orientation
-          // => temporally next segment is segment = segment + sign(vav * _current_tv)
-          in_right_direction = bool(vav * _current_tv >= 0);
-          switch_to_next_segment = bool(_rcav * _current_tv>= 0);
-          int8_t step;
-          if(in_right_direction){step = 1;} else {step = -1;}
-          _current_segment = _current_segment + step;
-        }
-      }
-      current_segment = _current_segment % 4;
-      }
+            if(close_to_crossing_point){
+              // the aircraft is in the vicinity of the crossing point; no consecutive switching of segments s allowed
+              // select the geodesic segment along which the aircraft can fly in accord with the segment's orientation by minimal course corrections
+              // vector etg1v - etg2v poin
+              if(vav * (etg1xv -etg2xv) >= 0){
+                // select segment corresponding to g1
+                _current_segment = 0;
+              } else {
+                // select segment corresponding to g2
+                _current_segment = 2;
+              }
+            } else {
+                // segments are labeled by integers: g1:0, c1:1, g2:2, c2:3 for the figure-eight pattern
+                // array of center vectors of the segments
+                Vector3f segments_cv[4] = {erg1v, erc1v, erg2v, erc2v};
+                // array of unit tangent vectors at the transgression points of the segments
+                Vector3f segments_tv[4] = {etg1c1v, etc1g2v, etg2c2v, etc2g1v};
+                // set current quadrant in dependence of the location of the aircraft
+                _current_segment = current_segment;
+                // select the center of the turning circle that is used to determine switching from the current to the subsequent segment
+                Vector3f _current_cv = segments_cv[_current_segment];
+                // selecting the tangent vector at the endpoint of the current segment
+                Vector3f _current_tv = segments_tv[_current_segment];
+                current_cv = _current_cv;
+                current_tv = _current_tv;
+                // position vector from center of the current turning circle to the aircraft
+                Vector3f _rcav = rav - _current_cv;
+                passed_transgression_point = bool(_rcav * _current_tv >= 0);
+                // if since last segment switching the aircraft has entered a new quadrant and has passed the transgression point in that quadrant, segment switching has to occur
+                if (entered_new_quadrant && passed_transgression_point){
+                    // if vav * _current_tv >= 0: the aircraft moves along the figure_eight pattern as prescribed by orientation
+                    //                       < 0: the aircraft moves along the figure_eight pattern in the opposite direction against the prescribed by orientation
+                    // => temporally next segment is segment = segment + sign(vav * _current_tv)
+                    moving_matches_orientation = 1;//bool(vav * _current_tv >= 0);
+                    int8_t step;
+                    if(moving_matches_orientation){step = 1;} else {step = -1;}
+                    _current_segment = _current_segment + step;
+                    _current_segment = _current_segment % 4;
+                    current_segment = _current_segment;
+                    current_quadrant = _current_quadrant;
+                }
+            }
+            }
 
+
+//      bool in_vicinity_of_crossing_point;
+//      bool in_right_direction;
+//      bool switch_to_next_segment;
+//
+//
+//// set the current segment in dependence of the position relative to the center of the sphere and velocity vector of the aircraft
+//      void set_current_segment(const Vector3f rav, const Vector3f vav) {
+//          // position vector from the center of the S2 to the aircraft projected onto the tangential plane
+//          Vector3f _rxaplanev = rxaplanev(rav);
+//      // minimum distance of aircraft from crossing point in the plane at which consecutive segment switching is allowed
+//         float _mindistxaplane = 0.5f * S2_radius_cm * sin_theta_0; // set to half of length of each of the four geodesic arms projected onto the tangential plane at the crossing point
+//
+//      // bool variable
+//      in_vicinity_of_crossing_point = bool(_rxaplanev.length() < _mindistxaplane);
+//      // projections of the aircraft's velocity vector onto the tangential vectors of the geodesic segments a the crossing point
+//      float vag1 = vav * etg1xv;
+//      float vag2 = vav * etg2xv;
+//      int8_t _current_segment = current_segment;
+//      if(in_vicinity_of_crossing_point){
+//        // the aircraft is in the vicinity of the crossing point; no consecutive switching of segments
+//        // select the geodesic segment with tangent vector maximal which has the maximal projection onto the aircraft's velocity vector
+//        if(vag1 > vag2){
+//          // select segment corresponding to g1
+//          _current_segment = 0;
+//        } else {
+//          // select segment corresponding to g2
+//          _current_segment = 2;
+//        }
+//      } else {
+//        // the aircraft is not in the vicinity of the crossing point; consecutive switching of segments required at the transgression points
+//        // quadrants are labeled by integers: NE:0, SE:1, SW:2, NW:3 for the figure-eight pattern with crossing point in the direction (0,0,-1) and east-west attitude;
+//        // turning circle centers for each quadrant
+//        Vector3f quadrants_cv[4] = {erc1v * dist_cm, erc1v * dist_cm, erc2v * dist_cm, erc2v * dist_cm};
+//        // unit tangent vectors at the transgression point of each quadrant
+//        Vector3f quadrants_tv[4] = {etg1c1v, etc1g2v, etg2c2v, etc2g1v};
+//        // set current quadrant in dependence of the location of the aircraft
+//        int8_t _current_quadrant = quadrant(rav);
+//        // selecting the center vector of the turning circle and tangent vector at transgression point for the current quadrant
+//        Vector3f _current_cv = quadrants_cv[_current_quadrant];
+//        Vector3f _current_tv = quadrants_tv[_current_quadrant];
+//        // position vector from center of the current turning circle to the aircraft
+//        Vector3f _rcav = rav - _current_cv;
+//        if (_rcav * _current_tv >= 0){
+//          // if _rcav * _current_tv >= 0, the switching to the next segment as determined by the orientation of the figure_eight pattern has to occur
+//          // if vav * _current_tv >= 0: the aircraft moves along the figure_eight pattern as prescribed by orientation
+//          //                       < 0: the aircraft moves along the figure_eight pattern in the opposite direction against the prescribed by orientation
+//          // => temporally next segment is segment = segment + sign(vav * _current_tv)
+//          in_right_direction = bool(vav * _current_tv >= 0);
+//          switch_to_next_segment = bool(_rcav * _current_tv>= 0);
+//          int8_t step;
+//          if(in_right_direction){step = 1;} else {step = -1;}
+//          _current_segment = _current_segment + step;
+//        }
+//      }
+//      current_segment = _current_segment % 4;
+//      }
+//
 
 
 //      bool sufficient_dist_to_crossing_point;

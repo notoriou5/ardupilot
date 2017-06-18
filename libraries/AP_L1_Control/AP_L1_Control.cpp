@@ -496,10 +496,10 @@ void AP_L1_Control::update_loiter_ellipse(const struct Location &center_loc, con
     const float sin_theta = sqrt(1.0f - sq(minmaxratio));
     // unit vectors e1 and e2 into the direction of the major and minor principal axes, respectively
     const Vector2f e1(cos_psi,sin_psi);
-    hal.console->print("e1: ");
-    hal.console->print(e1.x);
-    hal.console->print(", ");
-    hal.console->println(e1.y);
+//    hal.console->print("e1: ");
+//    hal.console->print(e1.x);
+//    hal.console->print(", ");
+//    hal.console->println(e1.y);
 
     const Vector2f e2(-e1.y,e1.x);
     //hal.console->print(e1.x);
@@ -1125,7 +1125,7 @@ void AP_L1_Control::update_loiter_ellipse(const struct Location &center_loc, con
 //}
 
 
-void AP_L1_Control::update_loiter_3d(const struct Location &S2center, const Vector3f &ercv, int32_t S2radius, const float &theta_r, int8_t orientation, Vector3f &aircraft_posS2center, Vector3f &aircraft_vel, struct Location &desired_loc)
+void AP_L1_Control::update_loiter_3d(const struct Location &S2center, const Vector3f &ercv, int32_t S2radius, const float &theta_r, int8_t orientation, struct Location &aircraft_loc, Vector3f &aircraft_vel, struct Location &desired_loc)
 {
 //    hal.console->print(S2center.alt);
 //    hal.console->print("erc: ");
@@ -1185,7 +1185,7 @@ void AP_L1_Control::update_loiter_3d(const struct Location &S2center, const Vect
     // aircraft's position vector from the center of the circle
     Vector3f S1ctoav(location_3d_diff_NED(S1center, _current_loc));
     // store aircraft position from the circle center for external use
-    aircraft_posS2center = S2ctoav;
+    aircraft_loc = _current_loc;
     // lateral projection of the aircraft's position vector
     Vector2f S1ctoalv(S1ctoav.x, S1ctoav.y);
     // update _target_bearing_cd
@@ -1300,8 +1300,8 @@ void AP_L1_Control::update_loiter_3d(const struct Location &S2center, const Vect
           // non-degenerate ellipse
           // distance of the aircraft from the center of the ellipse in meter
           const float ra = sqrt(sq(posal1) + sq(1/cos_theta * posal2));
-//           hal.console->println("cos_theta: ");
-//           hal.console->println(cos_theta);
+           hal.console->println("cos_theta: ");
+           hal.console->println(cos_theta);
 //           hal.console->println(S1ctoalv.x);
 //           hal.console->println(S1ctoalv.y);
 //           hal.console->println(e1.x);
