@@ -427,6 +427,7 @@ void Plane::update_loiter_3d()
     //hal.console->print("array: ");
     //hal.console->print(array[0]);
     nav_controller->update_loiter_3d(S1_in_S2.S2_loc, S1_in_S2.ercv, S1_in_S2.S2_radius_cm, S1_in_S2.theta_rho_deg, S1_in_S2.orientation, S1_in_S2.aircraft_loc, S1_in_S2.aircraft_vel, S1_in_S2.desired_loc);
+//    nav_controller->update_loiter_3d(S1_in_S2.S2_loc, Vector3f(0,0,-1), S1_in_S2.S2_radius_cm, S1_in_S2.theta_rho_deg, S1_in_S2.orientation, S1_in_S2.aircraft_loc, S1_in_S2.aircraft_vel, S1_in_S2.desired_loc);
 
     // code: Thomas Gehrmann
     // nav_controller->update_loiter_3d(home, intersection.circle_center, intersection.circle_radius, intersection.psi_plane, intersection.theta_plane, eight_sphere.omega, eight_sphere.sigma, intersection.distance_cm, loiter.direction, intersection.rot_matrix_pe, eight_sphere.segment, intersection.desired_loc);
@@ -449,8 +450,12 @@ void Plane::update_loiter_3d()
 //     hal.console->print(loiter.direction);
 //     hal.console->print("segment: ");
 //     hal.console->println(eight_sphere.segment);
-//     hal.console->print("desired_loc.alt: ");
-//     hal.console->println(intersection.desired_loc.alt);
+     hal.console->print("desired_loc: ");
+     hal.console->print(S1_in_S2.desired_loc.lat);
+     hal.console->print(", ");
+     hal.console->print(S1_in_S2.desired_loc.lng);
+     hal.console->print(", ");
+     hal.console->println(S1_in_S2.desired_loc.alt);
 
 }
 
@@ -479,25 +484,28 @@ void Plane::update_eight_sphere() {
 //    hal.console->println(eight_in_S2.aircraft_vel.z);
 
 
-    Vector3f rav =  location_3d_diff_NED(eight_in_R2.center_loc, eight_in_R2.aircraft_loc);
-    hal.console->print("signs: ");
-    hal.console->print(eight_in_S2.rxaplanev(rav) * eight_in_S2.epsixv);
-    hal.console->print(", ");
-    hal.console->println(eight_in_S2.rxaplanev(rav) * eight_in_S2.ethetaxv);
-
-    hal.console->print("in_vicinity_of_crossing_point: ");
-    hal.console->println(eight_in_S2.close_to_crossing_point);
-
-    hal.console->print("in_right_direction: ");
-    hal.console->println(eight_in_S2.moving_matches_orientation);
-
-    hal.console->print("switch_to_next_segment: ");
-    hal.console->println(eight_in_S2.passed_transgression_point);
-
-    eight_in_S2.set_current_segment(eight_in_S2.aircraft_loc, eight_in_S2.aircraft_vel);
+//    Vector3f rav = location_3d_diff_NED(eight_in_R2.center_loc, eight_in_R2.aircraft_loc);
+//    hal.console->print("signs: ");
+//    hal.console->print(eight_in_S2.rxaplanev(rav) * eight_in_S2.epsixv);
+//    hal.console->print(", ");
+//    hal.console->println(eight_in_S2.rxaplanev(rav) * eight_in_S2.ethetaxv);
 //
-    hal.console->print("segment: ");
+//    hal.console->print("in_vicinity_of_crossing_point: ");
+//    hal.console->println(eight_in_S2.close_to_crossing_point);
+//
+//    hal.console->print("in_right_direction: ");
+//    hal.console->println(eight_in_S2.moving_matches_orientation);
+//
+//    hal.console->print("switch_to_next_segment: ");
+//    hal.console->println(eight_in_S2.passed_transgression_point);
+//
+    eight_in_S2.set_current_segment(eight_in_S2.aircraft_loc, eight_in_S2.aircraft_vel);
+////
+    hal.console->print("quadrant,segment: ");
+    hal.console->print(eight_in_S2.current_quadrant);
+    hal.console->print(", ");
     hal.console->println(eight_in_S2.current_segment);
+//
 
 //    hal.console->print("etg1c1v: ");
 //    hal.console->print(eight_in_S2.etg1c1v.x);
@@ -526,22 +534,21 @@ void Plane::update_eight_sphere() {
 //    hal.console->print(eight_in_S2.etc2g1v.y);
 //    hal.console->print(", ");
 //    hal.console->println(eight_in_S2.etc2g1v.z);
-//    hal.console->print("etg1c1v: ");
 //
 //
-    hal.console->print("erc1v: ");
-    hal.console->print(eight_in_S2.erc1v.x);
-    hal.console->print(", ");
-    hal.console->print(eight_in_S2.erc1v.y);
-    hal.console->print(", ");
-    hal.console->println(eight_in_S2.erc1v.z);
-
-    hal.console->print("erc2v: ");
-    hal.console->print(eight_in_S2.erc2v.x);
-    hal.console->print(", ");
-    hal.console->print(eight_in_S2.erc2v.y);
-    hal.console->print(", ");
-    hal.console->println(eight_in_S2.erc2v.z);
+//    hal.console->print("erc1v: ");
+//    hal.console->print(eight_in_S2.erc1v.x);
+//    hal.console->print(", ");
+//    hal.console->print(eight_in_S2.erc1v.y);
+//    hal.console->print(", ");
+//    hal.console->println(eight_in_S2.erc1v.z);
+//
+//    hal.console->print("erc2v: ");
+//    hal.console->print(eight_in_S2.erc2v.x);
+//    hal.console->print(", ");
+//    hal.console->print(eight_in_S2.erc2v.y);
+//    hal.console->print(", ");
+//    hal.console->println(eight_in_S2.erc2v.z);
 
 //    hal.console->print("erg1v: ");
 //    hal.console->print(eight_in_S2.erg1v.x);
@@ -619,7 +626,8 @@ void Plane::update_eight_sphere() {
 //    hal.console->println(current_orientation);
 
 
-nav_controller->update_loiter_3d(eight_in_S2.S2_loc, current_ercv, eight_in_S2.S2_radius_cm, current_theta_r, current_orientation, eight_in_S2.aircraft_loc, eight_in_S2.aircraft_vel, eight_in_S2.desired_loc);
+    nav_controller->update_loiter_3d(eight_in_S2.S2_loc, current_ercv, eight_in_S2.S2_radius_cm, current_theta_r, current_orientation, eight_in_S2.aircraft_loc, eight_in_S2.aircraft_vel, eight_in_S2.desired_loc);
+//    nav_controller->update_loiter_3d(eight_in_S2.S2_loc, Vector3f(0,0,-1), eight_in_S2.S2_radius_cm, 30.0f, 1, eight_in_S2.aircraft_loc, eight_in_S2.aircraft_vel, eight_in_S2.desired_loc);
 
 }
 

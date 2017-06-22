@@ -57,14 +57,21 @@ void Plane::adjust_altitude_target()
 //    if (control_mode == LOITER_3D || control_mode == EIGHT_SPHERE) {
 //       set_target_altitude(S1_in_S2.height_cm);
 //    }
-      if (control_mode == LOITER_3D || control_mode == EIGHT_SPHERE) {
-          // code: Christoph Sieg:
+    // code: Thomas Gehrmann, slight modifications: Christoph Sieg
+//      if (control_mode == LOITER_3D || control_mode == EIGHT_SPHERE) {
+//          set_target_altitude_location(S1_in_S2.desired_loc);
+//          // set_target_altitude(intersection.height);
+//          //hal.console->println(intersection.desired_loc.alt);
+//          //set_target_altitude_location(intersection.desired_loc);
+//    }
+    // code: Christoph Sieg:
+      if (control_mode == LOITER_3D) {
           set_target_altitude_location(S1_in_S2.desired_loc);
-          // code: Thomas Gehrmann, slight modifications: Christoph Sieg
-          // set_target_altitude(intersection.height);
-          //hal.console->println(intersection.desired_loc.alt);
-          //set_target_altitude_location(intersection.desired_loc);
-    }
+      }
+      if (control_mode == EIGHT_SPHERE) {
+          // code: Christoph Sieg:
+          set_target_altitude_location(eight_in_S2.desired_loc);
+      }
 
     altitude_error_cm = calc_altitude_error_cm();
 }

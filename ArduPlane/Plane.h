@@ -838,7 +838,7 @@ private:
       // set internal variable _current quadrant in dependence of the location of the aircraft
       int8_t _current_quadrant = quadrant(rav);
       entered_new_quadrant = bool(_current_quadrant != current_quadrant);
-
+      current_quadrant = _current_quadrant;
       if(close_to_crossing_point){
         // the aircraft is in the vicinity of the crossing point; no consecutive switching of segments s allowed
         // select the geodesic segment along which the aircraft can fly in accord with the segment's orientation by minimal course corrections
@@ -878,7 +878,6 @@ private:
               _current_segment = _current_segment + step;
               _current_segment = _current_segment % 4;
               current_segment = _current_segment;
-              current_quadrant = _current_quadrant;
           }
       }
       }
@@ -1087,6 +1086,7 @@ private:
       }
 
 
+
       // quadrants are labeled by integers: NE:0, SE:1, SW:2, NW:3 for the figure-eight pattern with crossing point in the direction (0,0,-1) and east-west attitude;
       // returns the index of the quadrant in which the aircraft is located
       int8_t quadrant(const Vector3f rav) {
@@ -1113,7 +1113,7 @@ private:
                 // position vector from the center of the S2 to the aircraft projected onto the tangential plane at the crossing point
                 Vector3f _rxaplanev = rxaplanev(rav);
             // minimum distance of aircraft from crossing point in the plane at which consecutive segment switching is allowed
-               float _mindistxaplane = 0.25f * S2_radius_cm/ 100.0f * sin_theta_0; // set to half of length of each of the four geodesic arms projected onto the tangential plane at the crossing point
+               float _mindistxaplane = 0.125f * S2_radius_cm/ 100.0f * sin_theta_0; // set to half of length of each of the four geodesic arms projected onto the tangential plane at the crossing point
                //
                close_to_crossing_point = bool(_rxaplanev.length() <= _mindistxaplane);
             // set internal variable _current segment
@@ -1121,7 +1121,7 @@ private:
             // set internal variable _current quadrant in dependence of the location of the aircraft
             int8_t _current_quadrant = quadrant(rav);
             entered_new_quadrant = bool(_current_quadrant != current_quadrant);
-
+            current_quadrant = _current_quadrant;
             if(close_to_crossing_point){
               // the aircraft is in the vicinity of the crossing point; no consecutive switching of segments s allowed
               // select the geodesic segment along which the aircraft can fly in accord with the segment's orientation by minimal course corrections
@@ -1136,7 +1136,8 @@ private:
             } else {
                 // segments are labeled by integers: g1:0, c1:1, g2:2, c2:3 for the figure-eight pattern
                 // array of center vectors of the segments
-                Vector3f segments_cv[4] = {erg1v, erc1v, erg2v, erc2v};
+                //Vector3f segments_cv[4] = {erg1v, erc1v, erg2v, erc2v};
+                Vector3f segments_cv[4] = {erc1v * dist_cm, erc1v * dist_cm, erc2v * dist_cm, erc2v * dist_cm};
                 // array of unit tangent vectors at the transgression points of the segments
                 Vector3f segments_tv[4] = {etg1c1v, etc1g2v, etg2c2v, etc2g1v};
                 // set current quadrant in dependence of the location of the aircraft
@@ -1158,10 +1159,15 @@ private:
                     moving_matches_orientation = 1;//bool(vav * _current_tv >= 0);
                     int8_t step;
                     if(moving_matches_orientation){step = 1;} else {step = -1;}
-                    _current_segment = _current_segment + step;
-                    _current_segment = _current_segment % 4;
+                    if(orientation >=0 ){
+                        _current_segment = _current_segment + step;
+                        _current_segment = _current_segment % 4;
+                    } else {
+                        _current_segment = _current_segment + step;
+                        _current_segment = (4-_current_segment) % 4;
+                    }
+
                     current_segment = _current_segment;
-                    current_quadrant = _current_quadrant;
                 }
             }
             }
