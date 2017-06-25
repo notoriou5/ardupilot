@@ -462,27 +462,28 @@ void Plane::update_loiter_3d()
 // code: Christoph Sieg
 void Plane::update_eight_sphere() {
 
-//    hal.console->print("aircraft_posS2center: ");
-//    hal.console->print(eight_in_S2.aircraft_posS2center.x);
-//    hal.console->print(", ");
-//    hal.console->print(eight_in_S2.aircraft_posS2center.y);
-//    hal.console->print(", ");
-//    hal.console->println(eight_in_S2.aircraft_posS2center.z);
+    hal.console->print("aircraft_posS2center: ");
+    struct Location a_pos = eight_in_S2.aircraft_loc;
+    Vector3f avec = location_3d_diff_NED(eight_in_S2.S2_loc, a_pos);
+    Vector3f S1avec = avec - eight_in_S2.erc2v * eight_in_S2.dist_cm / 100.0f;
+    hal.console->print(S1avec.x);
+    hal.console->print(", ");
+    hal.console->print(S1avec.y);
+    hal.console->print(", ");
+    hal.console->println(S1avec.z);
 //
-//    hal.console->print("rxaplanev: ");
-//        hal.console->print(eight_in_S2.rxaplanev(eight_in_S2.aircraft_vel).x);
-//        hal.console->print(", ");
-//        hal.console->print(eight_in_S2.rxaplanev(eight_in_S2.aircraft_vel).y);
-//        hal.console->print(", ");
-//        hal.console->println(eight_in_S2.rxaplanev(eight_in_S2.aircraft_vel).z);
-//
-//    hal.console->print("aircraft_vel: ");
-//    hal.console->print(eight_in_S2.aircraft_vel.x);
-//    hal.console->print(", ");
-//    hal.console->print(eight_in_S2.aircraft_vel.y);
-//    hal.console->print(", ");
-//    hal.console->println(eight_in_S2.aircraft_vel.z);
+    hal.console->print("aircraft_vel: ");
+    Vector3f vel = eight_in_S2.aircraft_vel;
+    float len = vel.length();
+    if (len != 0.0f){vel = vel/len;}
+    hal.console->print(vel.x);
+    hal.console->print(", ");
+    hal.console->print(vel.y);
+    hal.console->print(", ");
+    hal.console->println(vel.z);
 
+    hal.console->print("projection");
+    hal.console->println(S1avec * eight_in_S2.etc2g1v);
 
 //    Vector3f rav = location_3d_diff_NED(eight_in_R2.center_loc, eight_in_R2.aircraft_loc);
 //    hal.console->print("signs: ");
@@ -504,66 +505,77 @@ void Plane::update_eight_sphere() {
     hal.console->print("quadrant,segment: ");
     hal.console->print(eight_in_S2.current_quadrant);
     hal.console->print(", ");
+
     hal.console->println(eight_in_S2.current_segment);
-//
+//close_to_crossing_point;
+    hal.console->print("close_to_crossing_point: ");
+    hal.console->println(eight_in_S2.close_to_crossing_point);
+    hal.console->print("entered_new_quadrant: ");
+//    hal.console->println(eight_in_S2.entered_new_quadrant);
+    hal.console->print("moving_matches_orientation: ");
+    hal.console->println(eight_in_S2.moving_matches_orientation);
+    hal.console->print("current_segment_is_first: ");
+//    hal.console->println(eight_in_S2.current_segment_is_first);
 
-//    hal.console->print("etg1c1v: ");
-//    hal.console->print(eight_in_S2.etg1c1v.x);
-//    hal.console->print(", ");
-//    hal.console->print(eight_in_S2.etg1c1v.y);
-//    hal.console->print(", ");
-//    hal.console->println(eight_in_S2.etg1c1v.z);
-//
-//    hal.console->print("etc1g2v: ");
-//    hal.console->print(eight_in_S2.etc1g2v.x);
-//    hal.console->print(", ");
-//    hal.console->print(eight_in_S2.etc1g2v.y);
-//    hal.console->print(", ");
-//    hal.console->println(eight_in_S2.etc1g2v.z);
-//
-//    hal.console->print("etg2c2v: ");
-//    hal.console->print(eight_in_S2.etg2c2v.x);
-//    hal.console->print(", ");
-//    hal.console->print(eight_in_S2.etg2c2v.y);
-//    hal.console->print(", ");
-//    hal.console->println(eight_in_S2.etg2c2v.z);
-//
-//    hal.console->print("etc2g1v: ");
-//    hal.console->print(eight_in_S2.etc2g1v.x);
-//    hal.console->print(", ");
-//    hal.console->print(eight_in_S2.etc2g1v.y);
-//    hal.console->print(", ");
-//    hal.console->println(eight_in_S2.etc2g1v.z);
-//
-//
-//    hal.console->print("erc1v: ");
-//    hal.console->print(eight_in_S2.erc1v.x);
-//    hal.console->print(", ");
-//    hal.console->print(eight_in_S2.erc1v.y);
-//    hal.console->print(", ");
-//    hal.console->println(eight_in_S2.erc1v.z);
-//
-//    hal.console->print("erc2v: ");
-//    hal.console->print(eight_in_S2.erc2v.x);
-//    hal.console->print(", ");
-//    hal.console->print(eight_in_S2.erc2v.y);
-//    hal.console->print(", ");
-//    hal.console->println(eight_in_S2.erc2v.z);
+    hal.console->print("geodesic should be g1? ");
+    hal.console->println(bool(eight_in_S2.aircraft_vel * (eight_in_S2.etg1xv - eight_in_S2.etg2xv) >= 0));
+    hal.console->print("etg1c1v: ");
+    hal.console->print(eight_in_S2.etg1c1v.x);
+    hal.console->print(", ");
+    hal.console->print(eight_in_S2.etg1c1v.y);
+    hal.console->print(", ");
+    hal.console->println(eight_in_S2.etg1c1v.z);
 
-//    hal.console->print("erg1v: ");
-//    hal.console->print(eight_in_S2.erg1v.x);
-//    hal.console->print(", ");
-//    hal.console->print(eight_in_S2.erg1v.y);
-//    hal.console->print(", ");
-//    hal.console->println(eight_in_S2.erg1v.z);
+    hal.console->print("etc1g2v: ");
+    hal.console->print(eight_in_S2.etc1g2v.x);
+    hal.console->print(", ");
+    hal.console->print(eight_in_S2.etc1g2v.y);
+    hal.console->print(", ");
+    hal.console->println(eight_in_S2.etc1g2v.z);
+
+    hal.console->print("etg2c2v: ");
+    hal.console->print(eight_in_S2.etg2c2v.x);
+    hal.console->print(", ");
+    hal.console->print(eight_in_S2.etg2c2v.y);
+    hal.console->print(", ");
+    hal.console->println(eight_in_S2.etg2c2v.z);
+
+    hal.console->print("etc2g1v: ");
+    hal.console->print(eight_in_S2.etc2g1v.x);
+    hal.console->print(", ");
+    hal.console->print(eight_in_S2.etc2g1v.y);
+    hal.console->print(", ");
+    hal.console->println(eight_in_S2.etc2g1v.z);
+
 //
-//    hal.console->print("erg2v: ");
-//    hal.console->print(eight_in_S2.erg2v.x);
-//    hal.console->print(", ");
-//    hal.console->print(eight_in_S2.erg2v.y);
-//    hal.console->print(", ");
-//    hal.console->println(eight_in_S2.erg2v.z);
-//
+    hal.console->print("erc1v: ");
+    hal.console->print(eight_in_S2.erc1v.x);
+    hal.console->print(", ");
+    hal.console->print(eight_in_S2.erc1v.y);
+    hal.console->print(", ");
+    hal.console->println(eight_in_S2.erc1v.z);
+
+    hal.console->print("erc2v: ");
+    hal.console->print(eight_in_S2.erc2v.x);
+    hal.console->print(", ");
+    hal.console->print(eight_in_S2.erc2v.y);
+    hal.console->print(", ");
+    hal.console->println(eight_in_S2.erc2v.z);
+
+    hal.console->print("erg1v: ");
+    hal.console->print(eight_in_S2.erg1v.x);
+    hal.console->print(", ");
+    hal.console->print(eight_in_S2.erg1v.y);
+    hal.console->print(", ");
+    hal.console->println(eight_in_S2.erg1v.z);
+
+    hal.console->print("erg2v: ");
+    hal.console->print(eight_in_S2.erg2v.x);
+    hal.console->print(", ");
+    hal.console->print(eight_in_S2.erg2v.y);
+    hal.console->print(", ");
+    hal.console->println(eight_in_S2.erg2v.z);
+
 //
 //    hal.console->print("trig of chi: ");
 //    hal.console->print(eight_in_S2.cos_chihalf);

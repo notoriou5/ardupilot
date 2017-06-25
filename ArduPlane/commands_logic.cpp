@@ -996,11 +996,11 @@ void Plane::do_loiter_3d()
 {
     S1_in_S2.S2_loc = home;
     S1_in_S2.S2_radius_cm = 12000;
-    S1_in_S2.theta_rho_deg = 30.0f;
+    S1_in_S2.theta_rho_deg = 45.0f;
     S1_in_S2.S1_radius_cm = S1_in_S2.S2_radius_cm * sinf(radians(S1_in_S2.theta_rho_deg));
     S1_in_S2.azimuth_deg = 0.0f;
     S1_in_S2.elevation_deg = 90.0f;
-    S1_in_S2.orientation = -1;
+    S1_in_S2.orientation = 1;
 
     float theta = 90.0f - S1_in_S2.elevation_deg;
 
@@ -1150,22 +1150,23 @@ void Plane::do_loiter_3d()
 void Plane::do_eight_sphere()
 {
     eight_in_S2.S2_loc = home; // location of the center of the S2
-    eight_in_S2.S2_radius_cm = 24000; // radius of the S2 in cm
-    eight_in_S2.theta_c_deg = 30.0f; // half of the angle between the centers of the two turning circle segments, range: [0,90] degrees
-    eight_in_S2.theta_r_deg = 20.705f; // opening angle of the cone with tip at S2_loc and base given by the turning circle, range: [0,90-theta_c_deg] degrees in order to guarantee that the sweeping angle between the two apices is less than 180 deg.
+    eight_in_S2.S2_radius_cm = 32000; // radius of the S2 in cm
+    eight_in_S2.theta_c_deg = 45.0f; // half of the angle between the centers of the two turning circle segments, range: [0,90] degrees
+    eight_in_S2.theta_r_deg = 15.f; // opening angle of the cone with tip at S2_loc and base given by the turning circle, range: [0,90-theta_c_deg] degrees in order to guarantee that the sweeping angle between the two apices is less than 180 deg.
     eight_in_S2.azimuth_deg = 0.0f; // azimuth angle of the vector pointing from S2_loc to the crossing point of the figure-eight pattern, range: [0,360]
-    eight_in_S2.elevation_deg = 90.0f; // inclination angle of the vector pointing from S2_loc to the crossing point of the figure-eight pattern, range [0,90]
-    eight_in_S2.orientation = -1; // orientation of the figure-eight pattern: +1: downwards flight on geodesic, upwards flight on turning circle segments
+    eight_in_S2.elevation_deg = 60.0f; // inclination angle of the vector pointing from S2_loc to the crossing point of the figure-eight pattern, range [0,90]
+    eight_in_S2.orientation = 1; // orientation of the figure-eight pattern: +1: downwards flight on geodesic, upwards flight on turning circle segments
                                  //                                          -1: upwards flight on geodesic, downwards flight on turning circle segments
 
     // the four segments are labeled by integers 0,1,2,3 in dependence of orientation
     // for orientation of the figure-eight pattern: +1: segment sequence is: geodesic_1 -> circle_1 -> geodesic_2 -> circle_2
     //                                              -1: segment sequence is: geodesic_1 -> circle_2 -> geodesic_2 -> circle_1
     // set current quadrant to a value that is not 0,1,2,3 such that it is altered in the initialization
-     eight_in_S2.current_quadrant = 4;
+    // eight_in_S2.current_quadrant = 4;
+    ahrs.get_position(eight_in_S2.aircraft_loc);
+    eight_in_S2.current_quadrant = eight_in_S2.quadrant(location_3d_diff_NED(eight_in_S2.S2_loc, eight_in_S2.aircraft_loc));
      eight_in_S2.current_segment = 0; // sets the start segment when eight_sphere is initialized
                                      // and the entry segment if no segment switching occurs because the aircraft is located in the vicinity of the crossing point defined by _mindistxaplane
-
 
     // derived parameters
     // trigonometric functions of all angles
