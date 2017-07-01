@@ -384,6 +384,8 @@ void Plane::stabilize()
             stabilize_stick_mixing_direct();
         }
         stabilize_yaw(speed_scaler);
+        hal.console->print("stabilize: ");
+        hal.console->println(micros());
     }
 
     /*

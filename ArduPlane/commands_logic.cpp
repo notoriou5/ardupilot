@@ -877,10 +877,10 @@ void Plane::do_loiter_ellipse()
     //ellipse.maxradius_cm = 15588.5;
     ellipse.maxradius_cm = 24000;
     //ellipse.minmaxratio = cosf(radians(60));
-    ellipse.minmaxratio = cosf(radians(0));
+    ellipse.minmaxratio = cosf(radians(80));
     ellipse.azimuth_deg = 0; // azimuth of the larger principal axis from the north direction
-    ellipse.orientation = 1;
-    ellipse.height_cm = 2000;
+    ellipse.orientation = -1;
+    ellipse.height_cm = 8000;
 
     ellipse.center_loc.alt = ellipse.center_loc.alt + ellipse.height_cm;
     next_WP_loc = ellipse.center_loc;
@@ -989,17 +989,28 @@ void Plane::do_eight_plane()
   // in SW quadrant
   eight_in_R2.etc2g1v = eight_in_R2.etg1v;
 
+  // array of turning circle center vectors labeled by the quadrant number
+  eight_in_R2.centervectors[0] = eight_in_R2.rc1v;
+  eight_in_R2.centervectors[1] = eight_in_R2.rc1v;
+  eight_in_R2.centervectors[2] = eight_in_R2.rc2v;
+  eight_in_R2.centervectors[3] = eight_in_R2.rc2v;
+  // array of unit tangent vectors at the transgression points of the segments labeled by the quadrant number
+  eight_in_R2.tangentvectors[0] =  eight_in_R2.etg1c1v;
+  eight_in_R2.tangentvectors[1] =  eight_in_R2.etc1g2v;
+  eight_in_R2.tangentvectors[2] =  eight_in_R2.etc2g1v;
+  eight_in_R2.tangentvectors[3] =  eight_in_R2.etg2c2v;
+
 }
 
 // code: Christoph Sieg:
 void Plane::do_loiter_3d()
 {
     S1_in_S2.S2_loc = home;
-    S1_in_S2.S2_radius_cm = 12000;
-    S1_in_S2.theta_rho_deg = 45.0f;
+    S1_in_S2.S2_radius_cm = 24000;
+    S1_in_S2.theta_rho_deg = 20.0f;
     S1_in_S2.S1_radius_cm = S1_in_S2.S2_radius_cm * sinf(radians(S1_in_S2.theta_rho_deg));
     S1_in_S2.azimuth_deg = 0.0f;
-    S1_in_S2.elevation_deg = 90.0f;
+    S1_in_S2.elevation_deg = 30.0f;
     S1_in_S2.orientation = 1;
 
     float theta = 90.0f - S1_in_S2.elevation_deg;
@@ -1154,19 +1165,13 @@ void Plane::do_eight_sphere()
     eight_in_S2.theta_c_deg = 45.0f; // half of the angle between the centers of the two turning circle segments, range: [0,90] degrees
     eight_in_S2.theta_r_deg = 15.f; // opening angle of the cone with tip at S2_loc and base given by the turning circle, range: [0,90-theta_c_deg] degrees in order to guarantee that the sweeping angle between the two apices is less than 180 deg.
     eight_in_S2.azimuth_deg = 0.0f; // azimuth angle of the vector pointing from S2_loc to the crossing point of the figure-eight pattern, range: [0,360]
-    eight_in_S2.elevation_deg = 60.0f; // inclination angle of the vector pointing from S2_loc to the crossing point of the figure-eight pattern, range [0,90]
+    eight_in_S2.elevation_deg = 90.0f; // inclination angle of the vector pointing from S2_loc to the crossing point of the figure-eight pattern, range [0,90]
     eight_in_S2.orientation = 1; // orientation of the figure-eight pattern: +1: downwards flight on geodesic, upwards flight on turning circle segments
                                  //                                          -1: upwards flight on geodesic, downwards flight on turning circle segments
 
     // the four segments are labeled by integers 0,1,2,3 in dependence of orientation
     // for orientation of the figure-eight pattern: +1: segment sequence is: geodesic_1 -> circle_1 -> geodesic_2 -> circle_2
     //                                              -1: segment sequence is: geodesic_1 -> circle_2 -> geodesic_2 -> circle_1
-    // set current quadrant to a value that is not 0,1,2,3 such that it is altered in the initialization
-    // eight_in_S2.current_quadrant = 4;
-    ahrs.get_position(eight_in_S2.aircraft_loc);
-    eight_in_S2.current_quadrant = eight_in_S2.quadrant(location_3d_diff_NED(eight_in_S2.S2_loc, eight_in_S2.aircraft_loc));
-     eight_in_S2.current_segment = 0; // sets the start segment when eight_sphere is initialized
-                                     // and the entry segment if no segment switching occurs because the aircraft is located in the vicinity of the crossing point defined by _mindistxaplane
 
     // derived parameters
     // trigonometric functions of all angles
@@ -1245,6 +1250,29 @@ void Plane::do_eight_sphere()
     eight_in_S2.etg1xv  = eight_in_S2.Rm * Vector3f(eight_in_S2.sin_chihalf, eight_in_S2.cos_chihalf, 0.0f) * eight_in_S2.orientation;
     eight_in_S2.etg2xv = eight_in_S2.Rm * Vector3f(eight_in_S2.sin_chihalf, -eight_in_S2.cos_chihalf, 0.0f) * eight_in_S2.orientation;
 
+
+     // array of turning circle center vectors labeled by the quadrant number
+     eight_in_S2.centervectors[0] = eight_in_S2.erc1v * eight_in_S2.dist_cm / 100.0f;
+     eight_in_S2.centervectors[1] = eight_in_S2.erc1v * eight_in_S2.dist_cm / 100.0f;
+     eight_in_S2.centervectors[2] = eight_in_S2.erc2v * eight_in_S2.dist_cm / 100.0f;
+     eight_in_S2.centervectors[3] = eight_in_S2.erc2v * eight_in_S2.dist_cm / 100.0f;
+      // array of unit tangent vectors at the transgression points of the segments labeled by the quadrant number
+     eight_in_S2.tangentvectors[0] = eight_in_S2.etg1c1v;
+     eight_in_S2.tangentvectors[1] = eight_in_S2.etc1g2v;
+     eight_in_S2.tangentvectors[2] = eight_in_S2.etc2g1v;
+     eight_in_S2.tangentvectors[3] = eight_in_S2.etg2c2v;
+
+
+     eight_in_S2.in_initial_quadrant = true; // has to be set to true in order to enable segment switching in the initial quadrant
+     eight_in_S2.entered_next_quadrant = true;
+    // set current quadrant to a value that is not 0,1,2,3 such that it is altered in the initialization
+    // eight_in_S2.current_quadrant = 4;
+    //ahrs.get_position(eight_in_S2.aircraft_loc);
+    eight_in_S2.current_quadrant = 3; //eight_in_S2.quadrant(location_3d_diff_NED(eight_in_S2.S2_loc, eight_in_S2.aircraft_loc));
+    eight_in_S2.current_segment = 0; // sets the start segment when eight_sphere is initialized
+                                     // and the entry segment if no segment switching occurs because the aircraft is located in the vicinity of the crossing point defined by _mindistxaplane
+
+    hal.console->println("INITIALIZATION!!!");
 }
 
 // initialization of an inclined figure-eight pattern on a sphere S^2, whose crossing point is located in the direction parameterized by azimuth w and inclination sigma

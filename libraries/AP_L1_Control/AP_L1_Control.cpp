@@ -627,7 +627,7 @@ void AP_L1_Control::update_loiter_ellipse(const struct Location &center_loc, con
         hal.console->println("degenerate ellipse: ");
         // if cos_theta == 0, the ellipse is degenerate; its lateral projection is a straight line spanned by e1
 
-        Vector2f deltav = e1 * maxradius_cm / 100.0f * orientation;
+        Vector2f deltav = e1 * maxradius_cm / 100.0f * 2.0 * orientation;
         struct Location start = center_loc;
         location_offset(start, -deltav.x, -deltav.y);
         struct Location end = center_loc;
@@ -1455,33 +1455,33 @@ void AP_L1_Control::update_loiter_3d(const struct Location &S2center, const Vect
           if (abs(posal1) >= segradius_cm/100.0f){
               if (posal1 >= 0) {
                   capture_loc = start_loc;
-                  hal.console->print("capture_loc = start_loc: ");
-                  hal.console->print(capture_loc.lat);
-                  hal.console->print(", ");
-                  hal.console->print(capture_loc.lng);
-                  hal.console->print(", ");
-                  hal.console->println(capture_loc.alt);
+//                  hal.console->print("capture_loc = start_loc: ");
+//                  hal.console->print(capture_loc.lat);
+//                  hal.console->print(", ");
+//                  hal.console->print(capture_loc.lng);
+//                  hal.console->print(", ");
+//                  hal.console->println(capture_loc.alt);
               } else {
                   capture_loc = end_loc;
-                  hal.console->print("capture_loc = end_loc: ");
-                  hal.console->print(capture_loc.lat);
-                  hal.console->print(", ");
-                  hal.console->print(capture_loc.lng);
-                  hal.console->print(", ");
-                  hal.console->println(capture_loc.alt);
+//                  hal.console->print("capture_loc = end_loc: ");
+//                  hal.console->print(capture_loc.lat);
+//                  hal.console->print(", ");
+//                  hal.console->print(capture_loc.lng);
+//                  hal.console->print(", ");
+//                  hal.console->println(capture_loc.alt);
               }
           } else {
               // int32_t heightsq = sq(S1radius)-sq(posal1* 100.0f);
               capture_loc = S1center;
               location_offset(capture_loc, e1.x * posal1, e1.y * posal1);
               capture_loc.alt = capture_loc.alt + sqrt(sq(S1radius)-sq(posal1* 100.0f));
-              hal.console->print("capture_loc = S1center + (");
-              hal.console->print(e1.x * posal1);
-              hal.console->print(", ");
-              hal.console->print(e1.y * posal1);
-              hal.console->print(", ");
-              hal.console->print(sqrt(sq(S1radius)-sq(posal1* 100.0f)));
-              hal.console->println(")");
+//              hal.console->print("capture_loc = S1center + (");
+//              hal.console->print(e1.x * posal1);
+//              hal.console->print(", ");
+//              hal.console->print(e1.y * posal1);
+//              hal.console->print(", ");
+//              hal.console->print(sqrt(sq(S1radius)-sq(posal1* 100.0f)));
+//              hal.console->println(")");
 //              hal.console->print(capture_loc.lat);
 //              hal.console->print(", ");
 //              hal.console->print(capture_loc.lng);

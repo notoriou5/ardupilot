@@ -620,6 +620,8 @@ void Plane::update_flight_mode(void)
     case EIGHT_PLANE:
     case LOITER_3D:
     case EIGHT_SPHERE:
+        hal.console->print("update_flight_mode: ");
+        hal.console->println(micros());
         calc_nav_roll();
         calc_nav_pitch();
         calc_throttle();
