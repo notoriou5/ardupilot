@@ -1272,7 +1272,7 @@ void Plane::do_eight_sphere()
     eight_in_S2.current_segment = 0; // sets the start segment when eight_sphere is initialized
                                      // and the entry segment if no segment switching occurs because the aircraft is located in the vicinity of the crossing point defined by _mindistxaplane
 
-    hal.console->println("INITIALIZATION!!!");
+    hal.console->println("Initialization of EIGHT-SPHERE completed");
 }
 
 // initialization of an inclined figure-eight pattern on a sphere S^2, whose crossing point is located in the direction parameterized by azimuth w and inclination sigma

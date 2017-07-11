@@ -467,6 +467,7 @@ void Plane::update_eight_sphere() {
         int32_t current_theta_r = eight_in_S2.current_theta_r();
         int8_t current_orientation = eight_in_S2.current_orientation();
 
+
     //    Vector3f current_ercv = eight_in_S2.ercvs[eight_in_S2.current_segment];
     //    int32_t current_theta_r = eight_in_S2.thetars[eight_in_S2.current_segment];
     //    int8_t current_orientation = eight_in_S2.orientations[eight_in_S2.current_segment];
@@ -496,12 +497,18 @@ void Plane::update_eight_sphere() {
     //    hal.console->print("eight_in_S2.current_orientation() :");
     //    hal.console->println(current_orientation);
 
-        hal.console->println("before loiter_3d: ");
-        hal.console->println(micros());
+//        hal.console->println("before loiter_3d: ");
+//        hal.console->println(micros());
         nav_controller->update_loiter_3d(eight_in_S2.S2_loc, current_ercv, eight_in_S2.S2_radius_cm, current_theta_r, current_orientation, eight_in_S2.aircraft_loc, eight_in_S2.aircraft_vel, eight_in_S2.desired_loc);
     //    nav_controller->update_loiter_3d(eight_in_S2.S2_loc, Vector3f(0,0,-1), eight_in_S2.S2_radius_cm, 30.0f, 1, eight_in_S2.aircraft_loc, eight_in_S2.aircraft_vel, eight_in_S2.desired_loc);
-        hal.console->println("after loiter_3d: ");
-        hal.console->println(micros());
+//        hal.console->println("after loiter_3d: ");
+//        hal.console->println(micros());
+            Vector3f adiff = location_3d_diff_NED(eight_in_S2.S2_loc, eight_in_S2.aircraft_loc);
+            Vector3f desdiff = location_3d_diff_NED(eight_in_S2.S2_loc, eight_in_S2.desired_loc);
+        hal.console->print("height, desired height: ");
+        hal.console->print(adiff.z);
+        hal.console->print(", ");
+        hal.console->println(desdiff.z);
 
 
         //eight_in_S2.set_current_segment(eight_in_S2.aircraft_loc, eight_in_S2.aircraft_vel);
@@ -536,19 +543,19 @@ void Plane::update_eight_sphere() {
     int8_t _next_quadrant = eight_in_S2.quadrants[(eight_in_S2.quadrant_count[eight_in_S2.current_quadrant] + eight_in_S2.orientation) % 4];
 
 
-    hal.console->print("current_quadrant, _next_quadrant: ");
-    hal.console->print(eight_in_S2.current_quadrant);
-    hal.console->print(", ");
-    hal.console->println(_next_quadrant);
-    hal.console->print("_current_quadrant, _current_segment: ");
-    hal.console->print(_current_quadrant);
-    hal.console->print(", ");
-    hal.console->println(_current_segment);
-
-    hal.console->print("switch entered_new_quadrant? ");
-    hal.console->print(!eight_in_S2.close_to_crossing_point);
-    hal.console->print(eight_in_S2.current_quadrant != _current_quadrant);
-    hal.console->println(eight_in_S2.entered_next_quadrant);
+//    hal.console->print("current_quadrant, _next_quadrant: ");
+//    hal.console->print(eight_in_S2.current_quadrant);
+//    hal.console->print(", ");
+//    hal.console->println(_next_quadrant);
+//    hal.console->print("_current_quadrant, _current_segment: ");
+//    hal.console->print(_current_quadrant);
+//    hal.console->print(", ");
+//    hal.console->println(_current_segment);
+//
+//    hal.console->print("switch entered_new_quadrant? ");
+//    hal.console->print(!eight_in_S2.close_to_crossing_point);
+//    hal.console->print(eight_in_S2.current_quadrant != _current_quadrant);
+//    hal.console->println(eight_in_S2.entered_next_quadrant);
 
     if(eight_in_S2.close_to_crossing_point){
 //        // aircraft is too close to the crossing point
@@ -595,9 +602,13 @@ void Plane::update_eight_sphere() {
         // aircraft is not too close to the crossing point
         // switching the current quadrant and current segment has to be checked and performed
         if (eight_in_S2.current_quadrant != _current_quadrant){
+            hal.console->print("entered new quadrant: ");
+            hal.console->println(_current_quadrant);
             // aircraft has entered another quadrant
             // determine if aircraft entered the next quadrant
             eight_in_S2.entered_next_quadrant = bool(_current_quadrant == _next_quadrant);
+            hal.console->print("new quadrant is next quadrant? ");
+            hal.console->println(eight_in_S2.entered_next_quadrant);
             if (eight_in_S2.entered_next_quadrant) {
                 // aircraft has entered correct next quadrant
                 // switch to next quadrant
@@ -608,9 +619,6 @@ void Plane::update_eight_sphere() {
             }
         }
     }
-
-    hal.console->print("eight_in_S2.entered_next_quadrant: ");
-    hal.console->println(eight_in_S2.entered_next_quadrant);
 
 
     // center vector associated with the current quadrant
@@ -627,19 +635,19 @@ void Plane::update_eight_sphere() {
     eight_in_S2.rcav = _rcav;
     Vector2f _rcavl(_rcav.x,_rcav.y);
     Vector2f _current_tvl(_current_tv.x,_current_tv.y);
-    eight_in_S2.projection = _rcavl.normalized() * _current_tvl * 100.0f+ 50.0f;
+    eight_in_S2.projection = _rcavl.normalized() * _current_tvl * 100.0f + 50.0f;
     //hal.console->print("projection: ");
-    hal.console->println(eight_in_S2.projection);
-    hal.console->print("after projection: ");
-    hal.console->println(micros());
+    //hal.console->println(eight_in_S2.projection);
+    //hal.console->print("after projection: ");
+    //hal.console->println(micros());
 
     // true if the current segment is the first in the quadrant: transgression point of that quadrant will be passed
     eight_in_S2.switch_to_2nd_segment_in_quadrant  = bool(eight_in_S2.projection >=0);//bool(_rcav * _current_tv >= 0);
     // true if the velocity vector of the aircraft is outbound / inbound  in the quadrants (0,3) / (1,2) for orientation = +1 and vice versa for orientation = -1
     eight_in_S2.moving_matches_orientation = bool(eight_in_S2.aircraft_vel * _current_cv * _current_direction > 0);
 
-    hal.console->print("eight_in_S2.in_initial_quadrant: ");
-    hal.console->println(eight_in_S2.in_initial_quadrant);
+    //hal.console->print("eight_in_S2.in_initial_quadrant: ");
+    //hal.console->println(eight_in_S2.in_initial_quadrant);
 
 
 
@@ -672,6 +680,7 @@ void Plane::update_eight_sphere() {
         // switch from first to second segment in the quadrant if
         //_current_segment = eight_in_S2.firstsegments[eight_in_S2.current_quadrant];
         if ((eight_in_S2.in_initial_quadrant || eight_in_S2.entered_next_quadrant) && eight_in_S2.switch_to_2nd_segment_in_quadrant){
+            hal.console->println("entering second segment of current quadrant.");
             // aircraft is in the first quadrant where figure-eight pattern is initialized or aircraft has entered next quadrant and switching to second segment is required
             // switch to second segment of the current quadrant
             _current_segment = eight_in_S2.secondsegments[eight_in_S2.current_quadrant];
@@ -685,7 +694,6 @@ void Plane::update_eight_sphere() {
 
     eight_in_S2.current_quadrant = _current_quadrant;
     eight_in_S2.current_segment = _current_segment;
-
 
 
 

@@ -1394,7 +1394,7 @@ void AP_L1_Control::update_loiter_3d(const struct Location &S2center, const Vect
           // Only fly 'capture' mode if outside the circle
           if (xtrackErrCirc > 0.0f && orientation * latAccDemCap < orientation * latAccDemCirc) {
               // capture mode
-              hal.console->println("non-degenerate case: capture");
+              // hal.console->println("non-degenerate case: capture");
               _latAccDem = latAccDemCap;
               _WPcircle = false;
               _bearing_error = Nu; // angle between demanded and achieved velocity vector, +ve to left of track
@@ -1407,7 +1407,7 @@ void AP_L1_Control::update_loiter_3d(const struct Location &S2center, const Vect
               //hal.console->println(desired_loc.alt);
           } else {
               // loiter
-              hal.console->println("loiter");
+              // hal.console->println("loiter");
               _latAccDem = latAccDemCirc;
               _WPcircle = true;
               _bearing_error = 0.0f; // bearing error (radians), +ve to left of track
@@ -1426,7 +1426,7 @@ void AP_L1_Control::update_loiter_3d(const struct Location &S2center, const Vect
               // hal.console->println(height);
           }
 } else {
-          hal.console->println("degenerate case");
+          //hal.console->println("degenerate case");
           // ellipse is degenerate to a line with unit tangent vector -e1, normal vector e2 running between start_loc and end_loc
           // aircraft should move along -e1 * orientation, i.e. in accord with the orientation of the upper (for theta = 90) hemicircle
           // e2, -e1, e_down form a right-handed coordinate system: looking downwards onto the (e1,e2)-plane in the -e1 direction, e2 points to the left
@@ -1449,9 +1449,9 @@ void AP_L1_Control::update_loiter_3d(const struct Location &S2center, const Vect
           // posal1 is projection of the aircraft's position onto the line: abs(posal1) > segradius_cm: projection lies outside segment
           //                                                          and   sgn(posal1) = +/-1: projection behind start point / in front of finish point
           struct Location capture_loc;
-          hal.console->print(posal1);
-          hal.console->print(", ");
-          hal.console->println(segradius_cm/100.0f);
+          // hal.console->print(posal1);
+          // hal.console->print(", ");
+          // hal.console->println(segradius_cm/100.0f);
           if (abs(posal1) >= segradius_cm/100.0f){
               if (posal1 >= 0) {
                   capture_loc = start_loc;
@@ -1573,7 +1573,7 @@ void AP_L1_Control::update_loiter_3d(const struct Location &S2center, const Vect
       // Only fly 'capture' mode if outside the circle
           if (xtrackErrCirc > 0.0f && orientation * latAccDemCap < orientation * latAccDemCirc) {
               // capture mode
-              hal.console->println("degenerate case: capture");
+              // hal.console->println("degenerate case: capture");
               _latAccDem = latAccDemCap;
               _WPcircle = false;
               _bearing_error = Nu; // angle between demanded and achieved velocity vector, +ve to left of track
@@ -1586,7 +1586,7 @@ void AP_L1_Control::update_loiter_3d(const struct Location &S2center, const Vect
               //hal.console->println(desired_loc.alt);
           } else {
               // loiter
-              hal.console->println("update_waypoint");
+              // hal.console->println("update_waypoint");
              _latAccDem = latAccDemCirc;
              _WPcircle = true;
              _bearing_error = 0.0f; // bearing error (radians), +ve to left of track
