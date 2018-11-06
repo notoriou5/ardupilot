@@ -60,7 +60,7 @@ Following changes need to be done in [...]/ardupilot/modules/mavlink...
 
 %% Starting a simulation:
 Switch to [...]/ardupilot/ArduPlane folder:
-	-> git checkout AWEsome //< switching to AWEsome branch
+	-> git checkout AWE_UniStuttgart //< switching to AWEsome branch
 	-> sim_vehicle.py -f jsbsim:Winddrone --console --map //< starts the Winddrone without tether simulation
 	-> sim_vehicle.py -f jsbsim:winddrone --console --map //< winddrone with tether sim does not work yet
 	In the newely started terminal with "MANUAL>": //< this is the command input for the dronesimulation
