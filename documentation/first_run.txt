@@ -1,0 +1,70 @@
+%% Getting the AWESOME Project to run first time:
+Following changes need to be done in [...]/ardupilot/modules/mavlink...
+1) .../pymavlink/mavutil.py Z.1440ff:
+    	36 : 'LOITER_ELLIPSE',
+    	37 : 'EIGHT_PLANE',
+    	38 : 'LOITER_3D',
+    	39 : 'EIGHT_SPHERE',
+2).../pymavlink/mission.proto Z.22ff:
+    	CMD_NAV_LOITER_ELLIPSE = 36;
+    	CMD_NAV_EIGHT_PLANE = 37;
+    	CMD_NAV_LOITER_3D = 38;
+    	CMD_NAV_EIGHT_SPHERE = 39;
+3).../message_definitions/v1.0/common.xml Z.80ff:
+      <entry value="36" name="MAV_CMD_NAV_LOITER_ELLIPSE">
+        <description>AWEsome Fligthmode</description>
+        <param index="1">Empty</param>
+        <param index="2">Empty</param>
+        <param index="3">Empty</param>
+        <param index="4">Empty</param>
+        <param index="5">Empty</param>
+        <param index="6">Empty</param>
+        <param index="7">Empty</param>
+      </entry>
+      <entry value="37" name="MAV_CMD_NAV_EIGHT_PLANE">
+        <description>AWEsome Fligthmode</description>
+        <param index="1">Empty</param>
+        <param index="2">Empty</param>
+        <param index="3">Empty</param>
+        <param index="4">Empty</param>
+        <param index="5">Empty</param>
+        <param index="6">Empty</param>
+        <param index="7">Empty</param>
+      </entry>
+      <entry value="38" name="MAV_CMD_NAV_LOITER_3D">
+        <description>AWEsome Fligthmode</description>
+        <param index="1">Empty</param>
+        <param index="2">Empty</param>
+        <param index="3">Empty</param>
+        <param index="4">Empty</param>
+        <param index="5">Empty</param>
+        <param index="6">Empty</param>
+        <param index="7">Empty</param>
+      </entry>
+      <entry value="39" name="MAV_CMD_NAV_EIGHT_SPHERE">
+        <description>AWEsome Fligthmode</description>
+        <param index="1">Empty</param>
+        <param index="2">Empty</param>
+        <param index="3">Empty</param>
+        <param index="4">Empty</param>
+        <param index="5">Empty</param>
+        <param index="6">Empty</param>
+        <param index="7">Empty</param>
+      </entry>
+4) rebuild pymavlink (if not working without): 
+	-> cd [...]/pymavlink
+	-> sudo pip install --upgrade pymavlink
+5) test as following:
+	-> cd [...]/ardupilot/ArduPlane
+	-> sim_vehicle.py -w //< if it builds without error message it is fine
+
+%% Starting a simulation:
+Switch to [...]/ardupilot/ArduPlane folder:
+	-> git checkout AWEsome //< switching to AWEsome branch
+	-> sim_vehicle.py -f jsbsim:Winddrone --console --map //< starts the Winddrone without tether simulation
+	-> sim_vehicle.py -f jsbsim:winddrone --console --map //< winddrone with tether sim does not work yet
+	In the newely started terminal with "MANUAL>": //< this is the command input for the dronesimulation
+	-> wp load ../Tools/autotest/ArduPlane-Missions/CMAC-turns.txt //< you can also choose different waypoints
+	-> arm throttle 
+	-> mode auto //< to launch the plane
+	-> mode 39 //< switches to eight_sphere flight mode
