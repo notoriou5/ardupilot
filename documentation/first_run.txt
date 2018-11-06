@@ -1,6 +1,6 @@
 %% Getting the AWESOME Project to run first time:
 Following changes need to be done in [...]/ardupilot/modules/mavlink...
-1) .../pymavlink/mavutil.py Z.1440ff:
+1) .../pymavlink/mavutil.py, insert in line 1440:
     	36 : 'LOITER_ELLIPSE',
     	37 : 'EIGHT_PLANE',
     	38 : 'LOITER_3D',
@@ -10,9 +10,9 @@ Following changes need to be done in [...]/ardupilot/modules/mavlink...
     	CMD_NAV_EIGHT_PLANE = 37;
     	CMD_NAV_LOITER_3D = 38;
     	CMD_NAV_EIGHT_SPHERE = 39;
-3).../message_definitions/v1.0/common.xml Z.80ff:
+3).../message_definitions/v1.0/common.xml, insert in line 731:
       <entry value="36" name="MAV_CMD_NAV_LOITER_ELLIPSE">
-        <description>AWEsome Fligthmode</description>
+        <description>AWEsome Flightmode</description>
         <param index="1">Empty</param>
         <param index="2">Empty</param>
         <param index="3">Empty</param>
@@ -22,7 +22,7 @@ Following changes need to be done in [...]/ardupilot/modules/mavlink...
         <param index="7">Empty</param>
       </entry>
       <entry value="37" name="MAV_CMD_NAV_EIGHT_PLANE">
-        <description>AWEsome Fligthmode</description>
+        <description>AWEsome Flightmode</description>
         <param index="1">Empty</param>
         <param index="2">Empty</param>
         <param index="3">Empty</param>
@@ -32,7 +32,7 @@ Following changes need to be done in [...]/ardupilot/modules/mavlink...
         <param index="7">Empty</param>
       </entry>
       <entry value="38" name="MAV_CMD_NAV_LOITER_3D">
-        <description>AWEsome Fligthmode</description>
+        <description>AWEsome Flightmode</description>
         <param index="1">Empty</param>
         <param index="2">Empty</param>
         <param index="3">Empty</param>
@@ -42,7 +42,7 @@ Following changes need to be done in [...]/ardupilot/modules/mavlink...
         <param index="7">Empty</param>
       </entry>
       <entry value="39" name="MAV_CMD_NAV_EIGHT_SPHERE">
-        <description>AWEsome Fligthmode</description>
+        <description>AWEsome Flightmode</description>
         <param index="1">Empty</param>
         <param index="2">Empty</param>
         <param index="3">Empty</param>
