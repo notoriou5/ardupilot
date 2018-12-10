@@ -50,6 +50,8 @@ public:
         k_param_osd,
 
         // Misc
+        k_param_omega_wind,         // orientation of figure-8 pattern
+        k_param_sigma_wind,         // slope of figure-8 pattern
         //
         k_param_auto_trim      = 10,
         k_param_log_bitmask_old,  // unused

@@ -182,6 +182,7 @@ void Plane::update_sensor_status_flags(void)
     case AUTO:
     case RTL:
     case LOITER:
+    case LOITER_3D:
     case AVOID_ADSB:
     case GUIDED:
     case CIRCLE:

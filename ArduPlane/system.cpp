@@ -455,7 +455,7 @@ void Plane::set_mode(enum FlightMode mode, mode_reason_t reason)
         auto_navigation_mode = true;
         do_loiter_at_location();
 
-#if SOARING_ENABLED == ENABLED		
+#if SOARING_ENABLED == ENABLED
         if (g2.soaring_controller.is_active() &&
             g2.soaring_controller.suppress_throttle()) {
 			g2.soaring_controller.init_thermalling();
@@ -463,6 +463,14 @@ void Plane::set_mode(enum FlightMode mode, mode_reason_t reason)
 		}
 #endif
 		
+        break;
+
+    case LOITER_3D:
+        throttle_allows_nudging = true;
+        auto_throttle_mode = true;
+        auto_navigation_mode = true;
+        do_loiter_3d();
+       // mission.start_or_resume();
         break;
 
     case AVOID_ADSB:
@@ -681,6 +689,9 @@ void Plane::notify_flight_mode(enum FlightMode mode)
         break;
     case LOITER:
         notify.set_flight_mode_str("LOITER");
+        break;
+    case LOITER_3D:
+        notify.set_flight_mode_str("LOITER3D");
         break;
     case AVOID_ADSB:
         notify.set_flight_mode_str("AVOI");

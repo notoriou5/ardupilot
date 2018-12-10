@@ -504,6 +504,7 @@ void Plane::update_flight_mode(void)
 
     case RTL:
     case LOITER:
+    case LOITER_3D:
         calc_nav_roll();
         calc_nav_pitch();
         calc_throttle();
@@ -759,6 +760,10 @@ void Plane::update_navigation()
         update_cruise();
         break;
 
+    case LOITER_3D:
+        update_loiter_3d();
+        break;
+
     case MANUAL:
     case STABILIZE:
     case TRAINING:
@@ -826,15 +831,26 @@ void Plane::update_alt()
         if (flight_stage == AP_Vehicle::FixedWing::FLIGHT_LAND && location_passed_point(current_loc, prev_WP_loc, next_WP_loc)) {
             distance_beyond_land_wp = get_distance(current_loc, next_WP_loc);
         }
-
+        
         bool soaring_active = false;
 #if SOARING_ENABLED == ENABLED
         if (g2.soaring_controller.is_active() && g2.soaring_controller.get_throttle_suppressed()) {
             soaring_active = true;
         }
 #endif
-        
-        SpdHgt_Controller->update_pitch_throttle(relative_target_altitude_cm(),
+        if (control_mode == LOITER_3D) {
+            SpdHgt_Controller->update_pitch_throttle(relative_target_altitude_cm(),
+                                                     target_airspeed_cm,
+                                                     flight_stage,
+                                                     distance_beyond_land_wp,
+                                                     get_takeoff_pitch_min_cd(),
+                                                     throttle_nudge,
+                                                     tecs_hgt_afe(),
+                                                     aerodynamic_load_factor,
+                                                     S1_in_S2.segment);
+        } 
+        else {
+            SpdHgt_Controller->update_pitch_throttle(relative_target_altitude_cm(),
                                                  target_airspeed_cm,
                                                  flight_stage,
                                                  distance_beyond_land_wp,
@@ -843,6 +859,7 @@ void Plane::update_alt()
                                                  tecs_hgt_afe(),
                                                  aerodynamic_load_factor,
                                                  soaring_active);
+        }
     }
 }
 

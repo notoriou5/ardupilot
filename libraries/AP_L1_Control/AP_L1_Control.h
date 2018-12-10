@@ -52,6 +52,7 @@ public:
     float loiter_radius (const float loiter_radius) const;
     void update_waypoint(const struct Location &prev_WP, const struct Location &next_WP, float dist_min = 0.0f);
     void update_loiter(const struct Location &center_WP, float radius, int8_t loiter_direction);
+    void update_loiter_3d(const struct Location &S2center, const Vector3f &ercv, int32_t S2radius, const float & theta_r, int8_t orientation, struct Location &aircraft_loc, Vector3f &aircraft_vel, struct Location &desired_loc);
     void update_heading_hold(int32_t navigation_heading_cd);
     void update_level_flight(void);
     bool reached_loiter_target(void);

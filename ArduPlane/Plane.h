@@ -692,6 +692,26 @@ private:
         uint32_t time_max_ms;
     } loiter;
 
+    // AWE Modifications
+    struct circ_on_sphere {
+        struct Location S2_loc;
+        //struct Location S1_loc;
+        Vector3f ercv;
+        int32_t S2_radius_cm;
+        int32_t S1_radius_cm;
+        int32_t distance_cm; // distance of center of the circle from the center of the sphere
+        float theta_rho_deg; // half of the opening angle of the cone with base S1
+        float azimuth_deg;
+        float elevation_deg;
+        int8_t orientation;
+        // variables to store the current and desired location and velocity
+        //        int32_t height_cm;
+        struct Location aircraft_loc;
+        Vector3f aircraft_vel;
+        struct Location desired_loc;
+
+        int32_t segment = 0;         // defines on which segment of the eight the plane is <- originally from eight_sphere, used for TECS
+    } S1_in_S2;
 
     // Conditional command
     // A value used in condition commands (eg delay, change alt, etc.)
@@ -873,6 +893,7 @@ private:
     bool verify_vtol_takeoff(const AP_Mission::Mission_Command &cmd);
     bool verify_vtol_land(const AP_Mission::Mission_Command &cmd);
     void do_loiter_at_location();
+    void do_loiter_3d();
     bool verify_loiter_heading(bool init);
     void exit_mission_callback();
     void mavlink_delay(uint32_t ms);
@@ -913,6 +934,7 @@ private:
     void calc_airspeed_errors();
     void calc_gndspeed_undershoot();
     void update_loiter(uint16_t radius);
+    void update_loiter_3d();
     void update_cruise();
     void update_fbwb_speed_height(void);
     void setup_turn_angle(void);

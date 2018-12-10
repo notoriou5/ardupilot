@@ -27,6 +27,7 @@ void Plane::update_soaring() {
             set_mode(RTL, MODE_REASON_SOARING_FBW_B_WITH_MOTOR_RUNNING);
         }
         break;
+    case LOITER_3D:
     case LOITER:
         // Do nothing. We will switch back to auto/rtl before enabling throttle.
         break;

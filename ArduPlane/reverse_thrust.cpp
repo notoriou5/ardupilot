@@ -55,7 +55,8 @@ bool Plane::allow_reverse_thrust(void) const
                     (nav_cmd == MAV_CMD_NAV_LOITER_TIME ||
                      nav_cmd == MAV_CMD_NAV_LOITER_TO_ALT ||
                      nav_cmd == MAV_CMD_NAV_LOITER_TURNS ||
-                     nav_cmd == MAV_CMD_NAV_LOITER_UNLIM);
+                     nav_cmd == MAV_CMD_NAV_LOITER_UNLIM ||
+                     nav_cmd == MAV_CMD_NAV_LOITER_3D);
 
         // waypoints
         allow |= (g.use_reverse_thrust & USE_REVERSE_THRUST_AUTO_WAYPOINT) &&
@@ -64,6 +65,7 @@ bool Plane::allow_reverse_thrust(void) const
         }
         break;
 
+    case LOITER_3D:
     case LOITER:
         allow |= (g.use_reverse_thrust & USE_REVERSE_THRUST_LOITER);
         break;

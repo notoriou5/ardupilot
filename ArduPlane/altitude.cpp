@@ -54,6 +54,11 @@ void Plane::adjust_altitude_target()
     } else {
         set_target_altitude_location(next_WP_loc);
     }
+    if (control_mode == LOITER_3D) {
+        set_target_altitude_location(S1_in_S2.desired_loc);
+          if (control_mode == LOITER_3D) {
+          set_target_altitude_location(S1_in_S2.desired_loc);
+      }}
 
     altitude_error_cm = calc_altitude_error_cm();
 }

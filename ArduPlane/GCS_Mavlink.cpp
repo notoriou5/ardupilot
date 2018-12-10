@@ -39,6 +39,7 @@ MAV_MODE GCS_MAVLINK_Plane::base_mode() const
     case AUTO:
     case RTL:
     case LOITER:
+    case LOITER_3D:
     case AVOID_ADSB:
     case GUIDED:
     case CIRCLE:
@@ -894,6 +895,10 @@ MAV_RESULT GCS_MAVLINK_Plane::handle_command_long_packet(const mavlink_command_l
         plane.set_mode(LOITER, MODE_REASON_GCS_COMMAND);
         return MAV_RESULT_ACCEPTED;
 
+    case MAV_CMD_NAV_LOITER_3D:
+        plane.set_mode(LOITER_3D, MODE_REASON_GCS_COMMAND);
+        return MAV_RESULT_ACCEPTED;
+
     case MAV_CMD_NAV_RETURN_TO_LAUNCH:
         plane.set_mode(RTL, MODE_REASON_GCS_COMMAND);
         return MAV_RESULT_ACCEPTED;
@@ -1545,6 +1550,7 @@ bool GCS_MAVLINK_Plane::set_mode(const uint8_t mode)
     case AUTO:
     case RTL:
     case LOITER:
+    case LOITER_3D:
     case QSTABILIZE:
     case QHOVER:
     case QLOITER:

@@ -244,6 +244,12 @@ void Plane::update_loiter(uint16_t radius)
     }
 }
 
+// AWE-Project
+void Plane::update_loiter_3d()
+{
+    nav_controller->update_loiter_3d(S1_in_S2.S2_loc, S1_in_S2.ercv, S1_in_S2.S2_radius_cm, S1_in_S2.theta_rho_deg, S1_in_S2.orientation, S1_in_S2.aircraft_loc, S1_in_S2.aircraft_vel, S1_in_S2.desired_loc);
+}
+
 /*
   handle CRUISE mode, locking heading to GPS course when we have
   sufficient ground speed, and no aileron or rudder input
@@ -349,4 +355,3 @@ bool Plane::reached_loiter_target(void)
     }
     return nav_controller->reached_loiter_target();
 }
-    
